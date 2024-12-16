@@ -22,7 +22,7 @@ def main():
     intents.members = True
     intents.voice_states = True
 
-    bot: commands.Bot = commands.Bot(command_prefix=get_server_prefix(), intents=intents) # type: ignore
+    bot: commands.Bot = commands.Bot(command_prefix=get_server_prefix(), intents=intents)
     llm_engine: LLMEngine = LLMEngine()
     vision_engine: VisionEngine = VisionEngine()
 
