@@ -108,3 +108,11 @@ def get_active_wse_servers():
     connected_servers = db.connected_servers
     query = connected_servers.find({"wse": True})
     return [server for server in query]
+
+
+def get_timeout_role(guild: discord.Guild) -> str:
+    connected_servers = db.connected_servers
+    query = connected_servers.find_one({"_id": guild.id},
+                                       {"timeout_role": 1})
+    query_dict: dict = cast(dict, query)
+    return str(query_dict["timeout_role"])
