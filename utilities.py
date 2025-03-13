@@ -1,3 +1,5 @@
+import asyncio
+import database as db
 from datetime import datetime
 import discord
 from discord.abc import Messageable
@@ -58,3 +60,20 @@ async def send_message(channel: Messageable, msg: str | None):
         await channel.send(file=msg_file)
 
     os.remove(OUTPUT_FILE)
+
+async def send_user_to_timeout(guild: discord.Guild,
+                               member: discord.Member,
+                               reason: str,
+                               delay: int = 0) -> None:
+    await asyncio.sleep(delay)
+    timeout_role_str = db.get_timeout_role(guild)
+    timeout_role = None
+
+    for role in guild.roles:
+        if role.name == timeout_role_str:
+            timeout_role = role
+            break
+
+    if timeout_role is not None:
+        await member.remove_roles(*member.roles[1:])
+        await member.add_roles(timeout_role, reason=reason)
