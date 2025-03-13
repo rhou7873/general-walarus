@@ -24,6 +24,7 @@ class VisionEngine():
             attachment_bytes = await attachment.read()
             new_file = discord.File(fp=io.BytesIO(
                 attachment_bytes), filename=f"bruh.{extension}")
+            print(attachment.content_type)
 
             if attachment.content_type.startswith("image"):
                 image = vision.Image(content=attachment_bytes)
@@ -41,18 +42,18 @@ class VisionEngine():
             await msg.channel.send(content=new_msg_content, files=resend_attachments)
 
     def __is_nsfw(self, image: vision.Image) -> bool:
-        LIKELIHOOD_NAMES = (
-            "UNKNOWN",
-            "VERY_UNLIKELY",
-            "UNLIKELY",
-            "POSSIBLE",
-            "LIKELY",
-            "VERY_LIKELY",
-        )
-        UNSAFE_SEARCH_INDICATORS = ['UNKNOWN',
-                                    'POSSIBLE', 'LIKELY', 'VERY_LIKELY']
-        response = self.__CLIENT.safe_search_detection(image=image)
-        safe_search = response.safe_search_annotation
+        UNSAFE_SEARCH_INDICATORS = ['POSSIBLE', 'LIKELY', 'VERY_LIKELY']
 
-        return (LIKELIHOOD_NAMES[safe_search.racy] in UNSAFE_SEARCH_INDICATORS or
-                LIKELIHOOD_NAMES[safe_search.adult] in UNSAFE_SEARCH_INDICATORS)
+        # build safe-search detection request
+        safe_search_feature = vision.Feature(type_=vision.Feature.Type.SAFE_SEARCH_DETECTION)
+        request = vision.AnnotateImageRequest(image=image, features=[safe_search_feature])
+        requests = vision.BatchAnnotateImagesRequest(requests=[request])
+
+        # process response 
+        result = self.__CLIENT.batch_annotate_images(requests)
+        safe_search = result.responses[0].safe_search_annotation
+
+        nsfw = (safe_search.racy.name in UNSAFE_SEARCH_INDICATORS
+                or safe_search.adult.name in UNSAFE_SEARCH_INDICATORS)
+         
+        return nsfw

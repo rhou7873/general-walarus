@@ -40,7 +40,7 @@ class EventsCog(Cog, name="Events"):
         if self.bot.user is None:
             raise Exception("bot.user is None")
 
-        bot_sent = message.author.id == self.bot.user.id
+        bot_sent = message.author.bot
 
         # Walarus responds if mentioned
         if self.bot.user in message.mentions:
