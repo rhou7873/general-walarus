@@ -1,6 +1,5 @@
 import asyncio
 from copy import deepcopy
-import discord
 from discord.ext.commands import Cog
 from discord.ext import commands
 from datetime import timedelta, datetime
@@ -10,11 +9,12 @@ import random
 from typing import cast
 from utilities import timef
 
+
 class ElectionCog(Cog, name="Election"):
     """ Class containing commands pertaining to elections """
-    
-    #region Commands
-    
+
+    # region Commands
+
     @commands.command(name="nextresult", aliases=["nextelectionresult"])
     async def next_election_result(self, ctx: commands.Context):
         """ Command that sends the time of the next election result """
@@ -29,7 +29,7 @@ class ElectionCog(Cog, name="Election"):
     @commands.command(name="election", aliases=["startelection"])
     async def start_elections(self, ctx: commands.Context, arg="default"):
         """ Command that initiates an automated election """
-        if ctx.guild is None: 
+        if ctx.guild is None:
             raise Exception("ctx.guild is None")
         if ctx.author.id != ctx.guild.owner_id:
             await ctx.send("Only the Supreme Leader can use this command")
@@ -42,14 +42,14 @@ class ElectionCog(Cog, name="Election"):
             else:
                 await ctx.send("Elections are already happening")
             return
-        server: Server = cast(Server, servers.get(ctx.guild)) 
+        server: Server = cast(Server, servers.get(ctx.guild))
         elections[ctx.guild] = Election(server)
         await self.carry_out_election(ctx, timedelta(minutes=server.rc_int))
-        
-    #endregion
-    
-    #region Helper Functions
-        
+
+    # endregion
+
+    # region Helper Functions
+
     async def carry_out_election(self, ctx: commands.Context, freq: timedelta):
         """ Handles repeatedly sending out election result until finished """
         if ctx.guild is None:
@@ -63,9 +63,11 @@ class ElectionCog(Cog, name="Election"):
         while len(members) > 0 and elections.get(ctx.guild) is not None:
             await asyncio.sleep(freq.total_seconds())
             member_num = random.randint(0, len(members) - 1)
-            index = random.randint(0, len(positions_used) - 1) if len(positions) == 0 else random.randint(0, len(positions) - 1)
+            index = random.randint(0, len(positions_used) - 1) if len(
+                positions) == 0 else random.randint(0, len(positions) - 1)
             chosen_one = members[member_num]
-            chosen_role = positions_used[index] if len(positions) == 0 else positions[index]
+            chosen_role = positions_used[index] if len(
+                positions) == 0 else positions[index]
             await ctx.send(f"New election result @everyone: {chosen_one}'s new position will be {chosen_role}")
             next = datetime.now() + freq
             positions.remove(chosen_role)
@@ -75,5 +77,5 @@ class ElectionCog(Cog, name="Election"):
             members.remove(chosen_one)
         await ctx.send("Election results have been finalized!")
         del elections[ctx.guild]
-    
-    #endregion
+
+    # endregion

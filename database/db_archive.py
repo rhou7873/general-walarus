@@ -1,19 +1,20 @@
-import discord
 from datetime import datetime, timedelta
 from .db_globals import *
-from .db_servers import get_chat_to_archive
 from pytz import timezone
+
 
 def get_next_archive_date() -> datetime:
     collection = db.next_archive_date
     data = collection.find_one({"_id": DATE_ID}, {"_id": 0})
     if data is None:
         raise Exception("Couldn't find document")
-    eastern = timezone("US/Eastern") 
+    eastern = timezone("US/Eastern")
     next_archive_date = eastern.localize(
-        datetime(data["year"], data["month"], data["day"], data["hour"], data["minute"], data["second"])
+        datetime(data["year"], data["month"], data["day"],
+                 data["hour"], data["minute"], data["second"])
     )
     return next_archive_date
+
 
 def get_archived_name(channel_name: str) -> str:
     date = get_next_archive_date()
@@ -21,6 +22,7 @@ def get_archived_name(channel_name: str) -> str:
     day = str(date.day)
     year = str(date.year)
     return f"{channel_name}-{month}-{day}-{year[len(year) - 2:]}"
+
 
 def update_next_archive_date(archive_freq: timedelta) -> None:
     old_date = get_next_archive_date()
@@ -34,4 +36,5 @@ def update_next_archive_date(archive_freq: timedelta) -> None:
         "second": new_date.second
     }
     collection = db.next_archive_date
-    collection.update_one({"_id": DATE_ID}, {"$set": new_date_fields}, upsert=True)
+    collection.update_one(
+        {"_id": DATE_ID}, {"$set": new_date_fields}, upsert=True)

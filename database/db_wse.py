@@ -4,11 +4,12 @@ from datetime import datetime
 from typing import cast, Literal
 from bson.timestamp import Timestamp
 
+
 def get_current_wse_price(discord_server: discord.Guild) -> float:
     price_log = db.wse_price_log
-    query = price_log.find_one({ "_id.server_id": discord_server.id }, { "_id": 0, "price": 1 }, 
-                                    sort=[("_id.timestamp", -1)])
-    query_dict = cast(dict, query) 
+    query = price_log.find_one({"_id.server_id": discord_server.id}, {"_id": 0, "price": 1},
+                               sort=[("_id.timestamp", -1)])
+    query_dict = cast(dict, query)
     price = float(query_dict["price"])
     return price
 
@@ -17,12 +18,12 @@ def set_current_wse_price(discord_server: discord.Guild, new_price: float) -> bo
     price_log = db.wse_price_log
     timestamp = datetime.now()
     return price_log.insert_one({
-                                    "_id": {
-                                        "server_id": discord_server.id,
-                                        "timestamp": timestamp
-                                    },
-                                    "price": new_price,
-                                }).acknowledged
+        "_id": {
+            "server_id": discord_server.id,
+            "timestamp": timestamp
+        },
+        "price": new_price,
+    }).acknowledged
 
 
 def get_prices(discord_server: discord.Guild):
@@ -30,7 +31,8 @@ def get_prices(discord_server: discord.Guild):
     prices = []
 
     price_log = db.wse_price_log
-    results = price_log.find({ "_id.server_id": discord_server.id }, { "_id.timestamp": 1, "price": 1 }, sort=[("_id.timestamp", 1)])
+    results = price_log.find({"_id.server_id": discord_server.id}, {
+                             "_id.timestamp": 1, "price": 1}, sort=[("_id.timestamp", 1)])
 
     for result in results:
         timestamps.append(str(result["_id"]["timestamp"].date()))
@@ -55,24 +57,25 @@ def set_transaction(member: discord.Member, curr_price: float, transaction_type:
             stock_value = 0
             cash_value = last_transaction["cash_value"] + curr_price
 
-    return transaction_log.insert_one({ 
-                                        "server_id": guild.id,
-                                        "server_name": guild.name,
-                                        "user_id": member.id,
-                                        "user_name": member.name,
-                                        "timestamp": timestamp, 
-                                        "action": transaction_type,
-                                        "price": curr_price,
-                                        "cash_value": cash_value,
-                                        "stock_value": stock_value
-                                      }).acknowledged
+    return transaction_log.insert_one({
+        "server_id": guild.id,
+        "server_name": guild.name,
+        "user_id": member.id,
+        "user_name": member.name,
+        "timestamp": timestamp,
+        "action": transaction_type,
+        "price": curr_price,
+        "cash_value": cash_value,
+        "stock_value": stock_value
+    }).acknowledged
 
 
 def get_last_transaction(member: discord.Member):
     transaction_log = db.wse_transaction_log
     guild = member.guild
-    query = transaction_log.find_one({ "server_id": guild.id, "user_id": member.id }, sort=[("timestamp", -1)])
-    query_dict = { "action": None } if query is None else cast(dict, query)
+    query = transaction_log.find_one(
+        {"server_id": guild.id, "user_id": member.id}, sort=[("timestamp", -1)])
+    query_dict = {"action": None} if query is None else cast(dict, query)
     return query_dict
 
 
@@ -84,11 +87,13 @@ def get_transactions(member: discord.Member | None = None, guild: discord.Guild 
         raise Exception("Need to provide either a member or guild")
 
     if member is not None:
-        guild = member.guild 
-        query = transaction_log.find({ "server_id": guild.id, "user_id": member.id }, sort=[("timestamp", 1)])
+        guild = member.guild
+        query = transaction_log.find(
+            {"server_id": guild.id, "user_id": member.id}, sort=[("timestamp", 1)])
         result = [transaction for transaction in query]
     elif guild is not None:
-        query = transaction_log.find({ "server_id": guild.id }, sort=[("timestamp", 1)])
+        query = transaction_log.find(
+            {"server_id": guild.id}, sort=[("timestamp", 1)])
         result = [transaction for transaction in query]
 
     return result

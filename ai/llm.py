@@ -33,7 +33,7 @@ class LLMEngine():
 
         while run.status == "queued" or run.status == "in_progress":
             run = self.__CLIENT.beta.threads.runs.retrieve(
-                thread_id=self.__LLM_THREAD.id, 
+                thread_id=self.__LLM_THREAD.id,
                 run_id=run.id
             )
             time.sleep(0.5)

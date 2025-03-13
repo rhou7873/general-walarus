@@ -1,10 +1,10 @@
 from datetime import datetime
 import discord
 from discord.abc import Messageable
-from io import BytesIO
 from models.server import Server
 import os
 from pytz import timezone
+
 
 def printlog(message: str) -> None:
     """ Prints input message to log file """
@@ -13,14 +13,17 @@ def printlog(message: str) -> None:
     log_file = open("log", "a")
     log_file.write(f"{now}: {message}\n")
     log_file.close()
-    
+
+
 def timef(dt: datetime) -> str:
     """ Format time of given datetime (ex. 02:47 PM CST) """
     return dt.strftime("%I:%M %p %Z")
 
+
 def now_time(server: Server) -> datetime:
     """ Gives datetime.now() with timezone of given server """
     return datetime.now(tz=timezone(server.timezone))
+
 
 def make_offset_aware(server: Server, dt: datetime) -> datetime:
     """ Getting datetime from DB gives offset-naive, by default, so 
@@ -28,11 +31,13 @@ def make_offset_aware(server: Server, dt: datetime) -> datetime:
     result: datetime = dt.replace(tzinfo=timezone(server.timezone))
     return result
 
+
 def get_server_prefix() -> str:
     """ Returns the given server's command prefix from DB 
     (this is just a placeholder for now) """
     result = os.getenv("CMD_PREFIX")
     return str(result)
+
 
 async def send_message(channel: Messageable, msg: str | None):
     if msg is None:
@@ -43,7 +48,7 @@ async def send_message(channel: Messageable, msg: str | None):
     if len(msg) < DISCORD_MSG_LIMIT:
         await channel.send(msg)
         return
-    
+
     # otherwise put message in a file and send file
     OUTPUT_FILE = "message.md"
     with open(OUTPUT_FILE, "x") as f:

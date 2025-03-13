@@ -11,8 +11,8 @@ class TimeSpan():
         seconds -= self._minutes * 60
         self._seconds: int = seconds
         self._seconds_unit = self.seconds_unit()
-    
-    #region Getters
+
+    # region Getters
 
     def days(self) -> int:
         return self._days
@@ -38,9 +38,9 @@ class TimeSpan():
     def seconds_unit(self) -> str:
         return "second" if self._seconds == 1 else "seconds"
 
-    #endregion
+    # endregion
 
-    #region Setters
+    # region Setters
 
     def set_days(self, days: int) -> None:
         self._days = days
@@ -54,4 +54,4 @@ class TimeSpan():
     def set_seconds(self, seconds: int) -> None:
         self._seconds = seconds
 
-    #endregion
+    # endregion
