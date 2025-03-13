@@ -42,7 +42,7 @@ class VisionEngine():
                 guild = msg.guild
                 author: discord.Member = cast(discord.Member, msg.author)
                 asyncio.create_task(ut.send_user_to_timeout(guild, author,
-                                    reason="Sent potential NSFW content", delay=5))
+                                    reason="Sent potential NSFW content"))
 
             new_msg_content = (f"**Blurring possible NSFW content in message from {msg.author.mention}**\n"
                                f"*Original message content:* {msg.content}")
