@@ -65,6 +65,9 @@ async def send_user_to_timeout(guild: discord.Guild,
                                member: discord.Member,
                                reason: str,
                                delay: int = 0) -> None:
+    if guild.owner_id == member.id:
+        return
+
     await asyncio.sleep(delay)
     timeout_role_str = db.get_timeout_role(guild)
     timeout_role = None
