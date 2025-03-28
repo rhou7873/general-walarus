@@ -99,6 +99,11 @@ class EventsCog(Cog, name="Events"):
         """ Event that runs when a user joins a guild """
         guild = member.guild
         db.create_user(guild, member)
+
+        # the following code is only if there is an active Walarus Stock Exchange
+        if live_wse_sessions.get(guild) is None:
+            return
+        
         MAGIC_USER = live_wse_sessions[guild].user_id
         if member.id == MAGIC_USER:
             db.set_current_wse_price(member.guild, 0)
