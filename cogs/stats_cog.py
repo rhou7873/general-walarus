@@ -5,6 +5,7 @@ import database as db
 from models import TimeSpan
 from typing import cast
 from utilities import printlog
+import io
 
 
 class StatisticsCog(Cog, name="Statistics"):
@@ -67,10 +68,10 @@ class StatisticsCog(Cog, name="Statistics"):
             return
         leaderboard: list = db.get_user_stats(ctx.guild)
 
-        def sort_key(user): return user["sent_messages"] + \
-            user["time_in_vc"] + user["mentioned"]
+        sort_key = lambda user: user["sent_messages"] + user["time_in_vc"] + user["mentioned"]
         leaderboard.sort(key=sort_key, reverse=True)
-        message = "```SERVER STATS LEADERBOARD\n\n"
+        
+        message = "SERVER STATS LEADERBOARD\n\n"
         for user in leaderboard:
             username = user["user_name"]
             mentioned = user["mentioned"]
@@ -83,8 +84,17 @@ class StatisticsCog(Cog, name="Statistics"):
             message += f"\tMessages sent: {sent_messages} {messages_unit}\n"
             message += (f"\tTime in VC: {vctime.days()} {vctime.days_unit()}, {vctime.hours()} "
                         f"{vctime.hours_unit()}, {vctime.minutes()} {vctime.minutes_unit()}, "
-                        f"{vctime.seconds()} {vctime.seconds_unit()}\n")
-        message += "```"
-        await ctx.send(message)
+                        f"{vctime.seconds()} {vctime.seconds_unit()}\n\n")
+
+        try:
+            # Discord-enforced message size limit, send as file instead
+            if len(message) > 2000:
+                msg_bytes = message.encode(encoding="utf-8")
+                discord_file = discord.File(fp=io.BytesIO(msg_bytes), filename="stats.txt")
+                await ctx.send(file=discord_file)
+            else:
+                await ctx.send(f"```{message}```")
+        except Exception as e:
+            printlog(str(e))
 
     # endregion

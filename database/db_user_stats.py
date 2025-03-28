@@ -68,7 +68,8 @@ def get_user_stats(discord_server: discord.Guild):
         "time_in_vc": 1
     }
     users = user_stats.find({
-        "_id.server_id": discord_server.id
+        "_id.server_id": discord_server.id,
+        "bot": False
     }, projection)
     return list(users)
 
