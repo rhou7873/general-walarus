@@ -39,6 +39,8 @@ class EventsCog(Cog, name="Events"):
             return
         if self.bot.user is None:
             raise Exception("bot.user is None")
+        if message.author is None:
+            raise Exception("message.author is None")
 
         bot_sent = message.author.bot
 
@@ -50,8 +52,7 @@ class EventsCog(Cog, name="Events"):
                 user_mention = f"@{self.bot.user.id}"
                 msg_to_bot = message.content.replace(
                     user_mention, "").replace("<>", "").strip()
-                response = self.llm_engine.get_llm_response(
-                    f"do not indicate that you are an AI model or LLM, but respond to this: {msg_to_bot}")
+                response = self.llm_engine.get_llm_response(author=message.author, input=msg_to_bot)
             await send_message(message.channel, response)
 
         # updating user stats in DB

@@ -1,3 +1,4 @@
+import discord
 from openai import OpenAI
 from openai.types.beta import Thread, thread_create_params
 import os
@@ -20,7 +21,8 @@ class LLMEngine():
         self.__MODEL = model
         self.__LLM_THREAD = self.create_new_thread()
 
-    def get_llm_response(self, input: str) -> str:
+    def get_llm_response(self, author: discord.Member, input: str) -> str:
+        input = f"from {author.name}: {input}"
         self.__CLIENT.beta.threads.messages.create(
             thread_id=self.__LLM_THREAD.id,
             role="user",
