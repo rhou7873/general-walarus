@@ -44,17 +44,6 @@ class EventsCog(Cog, name="Events"):
 
         bot_sent = message.author.bot
 
-        # Walarus responds if mentioned
-        if self.bot.user in message.mentions:
-            channel = message.channel
-            response: str | None
-            async with channel.typing():
-                user_mention = f"@{self.bot.user.id}"
-                msg_to_bot = message.content.replace(
-                    user_mention, "").replace("<>", "").strip()
-                response = self.llm_engine.get_llm_response(author=message.author, input=msg_to_bot)
-            await send_message(message.channel, response)
-
         # updating user stats in DB
         db.inc_user_stat(message.guild, cast(
             discord.User, message.author), "sent_messages")
@@ -65,8 +54,20 @@ class EventsCog(Cog, name="Events"):
                 db.inc_user_stat(message.guild, cast(
                     discord.User, user), "mentioned")
 
-        # if NSFW image sent, delete and resend with blur
-        if not bot_sent:
+        if bot_sent:
+            # Walarus responds if mentioned
+            if self.bot.user in message.mentions:
+                channel = message.channel
+                response: str | None
+                async with channel.typing():
+                    user_mention = f"@{self.bot.user.id}"
+                    msg_to_bot = message.content.replace(
+                        user_mention, "").replace("<>", "").strip()
+                    response = self.llm_engine.get_llm_response(
+                        author=message.author, input=msg_to_bot)
+                await send_message(message.channel, response)
+        else:
+            # if NSFW image sent, delete and resend with blur
             await self.vision_engine.check_if_nsfw(message)
 
     @commands.Cog.listener()
@@ -104,7 +105,7 @@ class EventsCog(Cog, name="Events"):
         # the following code is only if there is an active Walarus Stock Exchange
         if live_wse_sessions.get(guild) is None:
             return
-        
+
         MAGIC_USER = live_wse_sessions[guild].user_id
         if member.id == MAGIC_USER:
             db.set_current_wse_price(member.guild, 0)
