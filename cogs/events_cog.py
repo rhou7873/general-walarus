@@ -54,7 +54,7 @@ class EventsCog(Cog, name="Events"):
                 db.inc_user_stat(message.guild, cast(
                     discord.User, user), "mentioned")
 
-        if bot_sent:
+        if not bot_sent:
             # Walarus responds if mentioned
             if self.bot.user in message.mentions:
                 channel = message.channel
@@ -66,7 +66,7 @@ class EventsCog(Cog, name="Events"):
                     response = self.llm_engine.get_llm_response(
                         author=message.author, input=msg_to_bot)
                 await send_message(message.channel, response)
-        else:
+
             # if NSFW image sent, delete and resend with blur
             await self.vision_engine.check_if_nsfw(message)
 
