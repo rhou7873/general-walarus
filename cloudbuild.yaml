@@ -2,10 +2,15 @@ steps:
   # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/general-walarus:latest', '.']
+  # Push the Docker image to registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus:latest'
 
 # Tell Cloud Build to push the image to GCR automatically
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus/general-walarus:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
