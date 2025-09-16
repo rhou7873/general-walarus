@@ -1,0 +1,9 @@
+steps:
+- name: rhou7873/general-walarus:latest
+  args: ['build', '-t', 'rhou7873/general-walarus:latest', '.']
+
+images:
+- rhou7873/general-walarus:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
