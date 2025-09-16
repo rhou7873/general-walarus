@@ -5,7 +5,7 @@ steps:
 
 # Tell Cloud Build to push the image to GCR automatically
 images:
-  - 'gcr.io/$PROJECT_ID/general-walarus:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus/general-walarus:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
