@@ -1,6 +1,6 @@
 steps:
 - name: rhou7873/general-walarus:latest
-  args: ['build', '-t', 'rhou7873/general-walarus:latest', '.']
+  args: ['docker', 'build', '-t', 'rhou7873/general-walarus:latest', '.']
 
 images:
 - rhou7873/general-walarus:latest
