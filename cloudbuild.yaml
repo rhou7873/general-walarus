@@ -4,13 +4,13 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/registry/general-walarus:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
       - '.'
   # Push the Docker image to registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/registry/general-walarus:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
