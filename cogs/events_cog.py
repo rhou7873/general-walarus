@@ -8,7 +8,7 @@ from datetime import timedelta
 from ai import LLMEngine, VisionEngine
 from typing import cast
 from models import Server, WSESession
-from globals import servers, start_mutex, vc_connections, live_wse_sessions
+from globals import servers, vc_connections, live_wse_sessions
 from utilities import printlog, send_message
 
 
@@ -28,7 +28,6 @@ class EventsCog(Cog, name="Events"):
         EventsCog.initialize_servers(self.bot)
         EventsCog.initialize_wse_sessions(self.bot)
         print(f"General Walarus active in {len(servers)} server(s)")
-        start_mutex.release()
         # type: ignore
         await self.bot.get_cog("Archive").repeat_archive(timedelta(weeks=2))
 
