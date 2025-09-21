@@ -13,6 +13,3 @@ elections: dict[Guild, Election] = {}
 
 live_wse_sessions: dict[Guild, WSESession] = {}
 """Contains servers with active WSE sessions """
-
-start_mutex: threading.Semaphore = threading.Semaphore(0)
-""" Mutex used to synchronize GW on_ready and shell start """
