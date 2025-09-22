@@ -22,8 +22,7 @@ steps:
           --ssh-flag="-o StrictHostKeyChecking=no" \
           --command="
             docker pull us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest &&
-            docker stop general-walarus-container || true &&
-            docker rm general-walarus-container || true &&
+            docker rm -f general-walarus-container || true &&
             docker run -d --name general-walarus-container \
               --volume /home/rhou/GeneralWalarus/creds:/creds \
               --env BOT_TOKEN=${_BOT_TOKEN} \
