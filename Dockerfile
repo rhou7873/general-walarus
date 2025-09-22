@@ -10,4 +10,4 @@ ENV ENV_NAME=production
 
 COPY . .
 
-CMD [ "python", "./run.py" ]
+CMD [ "python", "run.py" ]
