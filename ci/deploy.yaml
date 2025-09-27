@@ -9,21 +9,21 @@ steps:
         gcloud compute ssh rhou7873@general-walarus \
           --zone=us-central1-a \
           --ssh-flag="-o StrictHostKeyChecking=no" \
-          --command="
+          --command='
             docker pull us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest && \
             docker stop $(docker ps -q) || true && \
             docker system prune -f && \
             docker run -d --name general-walarus-container-$BUILD_ID \
               --volume /home/rhou/GeneralWalarus/creds:/creds \
-              --env BOT_TOKEN=${_BOT_TOKEN} \
-              --env DB_CONN_STRING=${_DB_CONN_STRING} \
-              --env ARCHIVE_DATE_ID=${_ARCHIVE_DATE_ID} \
-              --env OPENAI_API_KEY=${_OPENAI_API_KEY} \
-              --env OPENAI_ASST_ID=${_OPENAI_ASST_ID} \
-              --env OPENAI_MODEL=${_OPENAI_MODEL} \
+              --env BOT_TOKEN='"$_BOT_TOKEN"' \
+              --env DB_CONN_STRING='"$_DB_CONN_STRING"' \
+              --env ARCHIVE_DATE_ID='"$_ARCHIVE_DATE_ID"' \
+              --env OPENAI_API_KEY='"$_OPENAI_API_KEY"' \
+              --env OPENAI_ASST_ID='"$_OPENAI_ASST_ID"' \
+              --env OPENAI_MODEL='"$_OPENAI_MODEL"' \
               --env GOOGLE_APPLICATION_CREDENTIALS=/creds/general-walarus-key.json \
               us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest
-          " 
+          '
 
 options:
   logging: CLOUD_LOGGING_ONLY
