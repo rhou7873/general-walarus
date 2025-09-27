@@ -20,7 +20,10 @@ steps:
     args:
       - -c
       - |
-        gcloud builds submit --config ci/deploy.yaml .
+        gcloud builds submit \
+        --config ci/deploy.yaml \
+        --substitutions=_BOT_TOKEN=$BOT_TOKEN,_DB_CONN_STRING=$DB_CONN_STRING,_ARCHIVE_DATE_ID=$ARCHIVE_DATE_ID,_OPENAI_API_KEY=$OPENAI_API_KEY,_OPENAI_ASST_ID=$OPENAI_ASST_ID,_OPENAI_MODEL=$OPENAI_MODEL \
+        .
 
 options:
   logging: CLOUD_LOGGING_ONLY
