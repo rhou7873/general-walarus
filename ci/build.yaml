@@ -1,0 +1,26 @@
+steps:
+  # Build new Docker image
+  - id: "build"
+    name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
+      - '.'
+  # Push new Docker image to registry
+  - id: "push"
+    name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
+  # Kickoff deploy trigger
+  - id: "trigger-deploy"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud builds submit --config ci/deploy.yaml .
+
+options:
+  logging: CLOUD_LOGGING_ONLY

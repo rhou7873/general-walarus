@@ -1,20 +1,7 @@
-# Configuration for GCP Cloud Build CI/CD pipeline 
-
 steps:
-  # Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
-      - '.'
-  # Push the Docker image to registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
-  # SSH into Compute Engine VM and deploy the new container
-  - name: 'gcr.io/cloud-builders/gcloud'
+  # SSH into Compute Engine VM and deploy a new container
+  - id: "deploy"
+    name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: bash
     args:
       - -c
