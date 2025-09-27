@@ -15,7 +15,7 @@ steps:
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
   # Kickoff deploy trigger
   - id: "trigger-deploy"
-    name: "gcr.io/cloud-builders/docker"
+    name: "gcr.io/cloud-builders/gcloud"
     entrypoint: bash
     args:
       - -c
