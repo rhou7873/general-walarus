@@ -10,6 +10,7 @@ steps:
           --zone=us-central1-a \
           --ssh-flag="-o StrictHostKeyChecking=no" \
           --command='
+            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet && \
             docker pull us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest && \
             docker stop $(docker ps -q) || true && \
             docker system prune -f && \
