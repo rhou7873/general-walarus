@@ -16,13 +16,10 @@ steps:
             docker system prune -f && \
             docker run -d --name general-walarus-container-$BUILD_ID \
               --volume /home/rhou/GeneralWalarus/creds:/creds \
-              --env BOT_TOKEN='"$_BOT_TOKEN"' \
-              --env DB_CONN_STRING='"$_DB_CONN_STRING"' \
-              --env ARCHIVE_DATE_ID='"$_ARCHIVE_DATE_ID"' \
-              --env OPENAI_API_KEY='"$_OPENAI_API_KEY"' \
-              --env OPENAI_ASST_ID='"$_OPENAI_ASST_ID"' \
-              --env OPENAI_MODEL='"$_OPENAI_MODEL"' \
-              --env GOOGLE_APPLICATION_CREDENTIALS=/creds/general-walarus-key.json \
+              --env API_URL='"$_BW_API_URL"' \
+              --env IDENTITY_URL='"$_BW_ID_URL"' \
+              --env ACCESS_TOKEN='"$_BW_ACCESS_TOKEN"' \
+              --env ENVIRONMENT='"$_ENVIRONMENT"' \
               us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest
           '
 

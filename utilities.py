@@ -1,4 +1,5 @@
 import asyncio
+from bw_secrets import CMD_PREFIX
 import database as db
 from datetime import datetime
 import discord
@@ -37,7 +38,7 @@ def make_offset_aware(server: Server, dt: datetime) -> datetime:
 def get_server_prefix() -> str:
     """ Returns the given server's command prefix from DB 
     (this is just a placeholder for now) """
-    result = os.getenv("CMD_PREFIX")
+    result = CMD_PREFIX
     return str(result)
 
 
