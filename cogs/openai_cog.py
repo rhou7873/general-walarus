@@ -1,3 +1,4 @@
+from bw_secrets import OPENAI_ASST_ID, OPENAI_MODEL
 from discord.ext.commands import Cog
 from discord.ext import commands
 from utilities import printlog
@@ -27,7 +28,7 @@ class OpenAICog(Cog, name="OpenAI"):
                 messages.append(
                     {"role": "user", "content": " ".join(message_input)})
                 chat = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo", messages=messages)
+                    model=OPENAI_MODEL, messages=messages)
                 success = True
                 break
             except Exception as e:

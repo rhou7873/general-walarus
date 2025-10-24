@@ -1,18 +1,16 @@
 import os
+from bw_secrets import BOT_TOKEN
 import discord
 from discord.ext import commands
-import discord.utils
 from cogs import (ArchiveCog, ElectionCog, EventsCog,
                   MiscellaneousCog, StatisticsCog, VoiceCog, OpenAICog,
                   WSECog)
 from ai import LLMEngine, VisionEngine
-import shell as sh
-from threading import Thread
 from utilities import get_server_prefix
 
 
 def run_bot(bot: commands.Bot):
-    bot.run(os.getenv("BOT_TOKEN"))
+    bot.run(BOT_TOKEN)
 
 
 def main():
