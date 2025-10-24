@@ -9,12 +9,14 @@ ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 if (API_URL is None or
     IDENTITY_URL is None or
-        ACCESS_TOKEN is None):
+    ACCESS_TOKEN is None or
+        ENVIRONMENT is None):
     raise Exception(
         "Environment variables aren't set: "
         f"API_URL={API_URL}, "
         f"IDENTITY_URL={IDENTITY_URL}, "
-        f"ACCESS_TOKEN={ACCESS_TOKEN}")
+        f"ACCESS_TOKEN={ACCESS_TOKEN}, "
+        f"ENVIRONMENT={ENVIRONMENT}")
 
 client = BitwardenClient(
     client_settings_from_dict(
@@ -34,17 +36,17 @@ client.access_token_login(ACCESS_TOKEN)
 # Discord
 BOT_TOKEN = (
     client.secrets().get(  # BOT_TOKEN_PROD
-    "d7c5b115-4cfb-4479-9d4c-b38000008a66").data.value
+        "d7c5b115-4cfb-4479-9d4c-b38000008a66").data.value
     if ENVIRONMENT == "production"
     else client.secrets().get(  # BOT_TOKEN_DEV
-    "8e56d9a2-3e34-4131-8257-b2e300451fca").data.value
+        "8e56d9a2-3e34-4131-8257-b2e300451fca").data.value
 )
 CMD_PREFIX = (
     client.secrets().get(  # CMD_PREFIX_PROD
-    "be8ee3a4-36b9-4018-8238-b3800004dc1b").data.value
+        "be8ee3a4-36b9-4018-8238-b3800004dc1b").data.value
     if ENVIRONMENT == "production"
     else client.secrets().get(  # CMD_PREFIX_DEV
-    "1586f5d6-2a3d-470b-bdbd-b3800004d238").data.value
+        "1586f5d6-2a3d-470b-bdbd-b3800004d238").data.value
 )
 
 # GCP
