@@ -16,9 +16,9 @@ steps:
             docker system prune -f && \
             docker run -d --name general-walarus-container-$BUILD_ID \
               --volume /home/rhou/GeneralWalarus/creds:/creds \
-              --env API_URL='"$_BW_API_URL"' \
-              --env IDENTITY_URL='"$_BW_ID_URL"' \
-              --env ACCESS_TOKEN='"$_BW_ACCESS_TOKEN"' \
+              --env BW_API_URL='"$_BW_API_URL"' \
+              --env BW_ID_URL='"$_BW_ID_URL"' \
+              --env BW_ACCESS_TOKEN='"$_BW_ACCESS_TOKEN"' \
               --env ENVIRONMENT='"$_ENVIRONMENT"' \
               us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest
           '
