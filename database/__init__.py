@@ -15,7 +15,8 @@ from .db_user_stats import (inc_user_stat,
                             update_user_stats, 
                             get_user_stat, 
                             get_user_stats, 
-                            create_user)
+                            create_user,
+                            remove_user)
 from .db_wse import (get_current_wse_price,
                      set_current_wse_price,
                      get_prices,

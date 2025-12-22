@@ -1,7 +1,7 @@
 from bw_secrets import ARCHIVE_DATE_ID, MONGO_CONN_STRING
 from pymongo.mongo_client import MongoClient
 from bson.objectid import ObjectId
-import os
+
 
 db = MongoClient(MONGO_CONN_STRING).general_walarus
 

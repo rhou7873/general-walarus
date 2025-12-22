@@ -2,8 +2,19 @@ steps:
   # Build new Docker image
   - id: "build"
     name: 'gcr.io/cloud-builders/docker'
+    env:
+      - 'DOCKER_BUILDKIT=1'
+      - 'OSDK_GENERATE_TOKEN=$_OSDK_GENERATE_TOKEN'
+      - 'OSDK_INDEX_URL=$_OSDK_INDEX_URL'
+      - 'OSDK_EXTRA_INDEX_URL=$_OSDK_EXTRA_INDEX_URL'
     args:
       - 'build'
+      - '--secret'
+      - 'id=osdk_generate_token,env=OSDK_GENERATE_TOKEN'
+      - '--secret'
+      - 'id=osdk_index_url,env=OSDK_INDEX_URL'
+      - '--secret'
+      - 'id=osdk_extra_index_url,env=OSDK_EXTRA_INDEX_URL'
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
       - '.'
