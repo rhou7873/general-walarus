@@ -66,3 +66,11 @@ OPENAI_ASST_ID = client.secrets().get(
     "43d19e39-2fff-43d9-a7d3-b380000109e1").data.value
 OPENAI_MODEL = client.secrets().get(
     "48833c1b-308f-4064-bca7-b38000011ea5").data.value
+
+# Foundry
+FOUNDRY_CLIENT_ID = client.secrets().get(
+    "6594d5cf-dd33-4d64-a639-b3ba015af8bf").data.value
+FOUNDRY_CLIENT_SECRET = client.secrets().get(
+    "08c04932-1cdc-4347-95aa-b3ba01565f58").data.value
+FOUNDRY_URL = client.secrets().get(
+    "f19669b3-3ee6-48e2-ba6a-b3ba0157001e").data.value

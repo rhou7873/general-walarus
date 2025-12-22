@@ -99,3 +99,17 @@ def create_user(discord_server: discord.Guild, user) -> bool:
             "bot": user.bot
         }
     }, upsert=True).upserted_id != None
+
+
+def remove_user(discord_server: discord.Guild, user) -> bool:
+    user_stats = db.user_stats
+    find = user_stats.find_one(
+        {"_id": {"server_id": discord_server.id, "user_id": user.id}})
+    if find != None:
+        return False
+    return user_stats.delete_one({
+        "_id": {
+            "server_id": discord_server.id,
+            "user_id": user.id
+        }
+    }).deleted_count == 1

@@ -1,3 +1,4 @@
+from argparse import Action
 from datetime import datetime, timedelta
 import discord
 from discord.ext.commands import Cog
@@ -8,12 +9,14 @@ from datetime import timedelta
 from ai import LLMEngine, VisionEngine
 from typing import cast
 from models import Server, WSESession
-from globals import servers, vc_connections, live_wse_sessions
+from globals import servers, live_wse_sessions
 from utilities import printlog, send_message
+from osdk import ActionTypes
 
 
 class EventsCog(Cog, name="Events"):
     """ Class containing implementations for Discord bot events """
+    log = logging.getLogger(f"{__name__}.EventsCog")
 
     def __init__(self, bot: discord.Bot, llm_engine: LLMEngine | None, vision_engine: VisionEngine):
         self.bot = bot
@@ -78,6 +81,10 @@ class EventsCog(Cog, name="Events"):
         servers[guild] = Server(guild)
         db.log_server(guild)
 
+        # OSDK update
+        ActionTypes.create_guild(guild.id)
+
+
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         """ Event that runs when General Walarus gets removed from a server.\n
@@ -87,6 +94,9 @@ class EventsCog(Cog, name="Events"):
             f"General Walarus has been removed from guild '{guild.name}' (id: {guild.id})")
         printlog(
             f"{db.remove_discord_server(guild)} documents removed from database")
+
+        # OSDK update
+        ActionTypes.delete_guild(guild.id)
 
     @commands.Cog.listener()
     async def on_guild_update(self, before: discord.Guild, after: discord.Guild):
@@ -99,20 +109,36 @@ class EventsCog(Cog, name="Events"):
     async def on_member_join(self, member: discord.Member) -> None:
         """ Event that runs when a user joins a guild """
         guild = member.guild
-        db.create_user(guild, member)
 
-        # the following code is only if there is an active Walarus Stock Exchange
-        if live_wse_sessions.get(guild) is None:
+        if not db.create_user(guild, member):
+            EventsCog.log.error("Failed to create user in MongoDB")
             return
 
-        MAGIC_USER = live_wse_sessions[guild].user_id
-        if member.id == MAGIC_USER:
-            db.set_current_wse_price(member.guild, 0)
-            general: discord.TextChannel | None
-            general = utils.find(lambda channel: channel.name ==
-                                 "general", guild.text_channels)
-            if general is not None:
-                await general.send("@everyone the WSE has crashed!!")
+        # the following code is only if there is an active Walarus Stock Exchange
+        if live_wse_sessions.get(guild) is not None:
+            MAGIC_USER = live_wse_sessions[guild].user_id
+            if member.id == MAGIC_USER:
+                db.set_current_wse_price(member.guild, 0)
+                general: discord.TextChannel | None
+                general = utils.find(lambda channel: channel.name ==
+                                    "general", guild.text_channels)
+                if general is not None:
+                    await general.send("@everyone the WSE has crashed!!")
+
+        # OSDK update
+        ActionTypes.create_member(member.id)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member) -> None:
+        """ Event that runs when a user is removed from a guild """
+        guild = member.guild
+
+        if not db.remove_user(guild, member):
+            EventsCog.log.error("Failed to remove user in MongoDB")
+            return
+
+        # OSDK update
+        ActionTypes.delete_member(member.id)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, ex: commands.CommandError):
