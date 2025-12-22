@@ -72,5 +72,15 @@ FOUNDRY_CLIENT_ID = client.secrets().get(
     "6594d5cf-dd33-4d64-a639-b3ba015af8bf").data.value
 FOUNDRY_CLIENT_SECRET = client.secrets().get(
     "08c04932-1cdc-4347-95aa-b3ba01565f58").data.value
+FOUNDRY_OSDK_TOKEN = client.secrets().get(
+    "fab9180c-73b4-4343-915e-b3bb001b3197").data.value
 FOUNDRY_URL = client.secrets().get(
     "f19669b3-3ee6-48e2-ba6a-b3ba0157001e").data.value
+OSDK_RUN_TOKEN = client.secrets().get(
+    "fab9180c-73b4-4343-915e-b3bb001b3197").data.value
+OSDK_GENERATE_TOKEN = client.secrets().get(
+    "829d6638-8cfa-436b-a0c6-b3bb01103bbf").data.value
+OSDK_INDEX_URL = client.secrets().get(
+    "002d7605-1ea2-4d80-a94d-b3bb001c5c28").data.value
+OSDK_EXTRA_INDEX_URL = client.secrets().get(
+    "bbe8e2d0-e51b-457e-b63f-b3bb001c75a2").data.value

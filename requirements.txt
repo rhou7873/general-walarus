@@ -20,9 +20,7 @@ distro==1.9.0
 dnspython==2.8.0
 fonttools==4.60.1
 foundry-platform-sdk==1.68.0
-foundry-sdk-runtime==2.163.0
 frozenlist==1.8.0
-general_walarus_python_osdk_sdk==0.3.0
 google-api-core==2.27.0
 google-auth==2.41.1
 google-cloud-vision==3.11.0

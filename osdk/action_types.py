@@ -1,7 +1,9 @@
-from osdk import osdk
+from .osdk_globals import osdk
+import discord
 from foundry_sdk_runtime.types import (
     ActionConfig,
     ActionMode,
+    ReturnEditsMode,
     SyncApplyActionResponse
 )
 import logging
@@ -10,68 +12,116 @@ import logging
 class ActionTypes:
     log = logging.getLogger(f"{__name__}.ActionTypes")
 
-    def __init__(self, response: SyncApplyActionResponse):
-        self.response = response
-
-    def delete_guild(guild_id: str) -> bool:
-        response: SyncApplyActionResponseosdk.ontology.actions.delete_guilds(
+    @staticmethod
+    def create_guild(guild: discord.Guild) -> bool:
+        response: SyncApplyActionResponse = osdk.ontology.actions.create_guild(
             action_config=ActionConfig(
                 mode=ActionMode.VALIDATE_AND_EXECUTE,
-                return_result=ReturnResultType.ALL
+                return_edits=ReturnEditsMode.ALL
             ),
-            guilds=[guild_id]
+            server_id=str(guild.id),
+            name=guild.name
         )
 
         if response.validation.result != "VALID":
-            log.error("Failed to run delete guild action")
+            ActionTypes.log.error("Failed to run create guild action")
             return False
 
         return True
 
-    def delete_guilds(guild_ids: list[str]) -> bool:
-        for guild_id in guild_ids:
-            if not delete_guild(guild_id):
-                return False
-        return True
+    @staticmethod
+    def delete_guild(guild: discord.Guild) -> bool:
+        return ActionTypes.delete_guilds([guild])
 
-    def delete_member(member_id: str) -> bool:
-        response: SyncApplyActionResponseosdk.ontology.actions.delete_members(
+    @staticmethod
+    def delete_guilds(guilds: list[discord.Guild]) -> bool:
+        response: SyncApplyActionResponse = osdk.ontology.actions.delete_guilds(
             action_config=ActionConfig(
                 mode=ActionMode.VALIDATE_AND_EXECUTE,
-                return_result=ReturnResultType.ALL
+                return_edits=ReturnEditsMode.ALL
             ),
-            members=[member_id]
+            guilds=[str(guild.id) for guild in guilds]
         )
 
         if response.validation.result != "VALID":
-            log.error("Failed to run delete member action")
+            ActionTypes.log.error("Failed to run delete guilds action")
             return False
 
         return True
 
-    def delete_members(member_ids: list[str]) -> bool:
-        for member_id in member_ids:
-            if not delete_member(member_id):
-                return False
-        return True
-
-    def delete_role(role_id: str) -> bool:
-        response: SyncApplyActionResponseosdk.ontology.actions.delete_roles(
+    @staticmethod
+    def create_member(member: discord.Member) -> bool:
+        response: SyncApplyActionResponse = osdk.ontology.actions.create_member(
             action_config=ActionConfig(
                 mode=ActionMode.VALIDATE_AND_EXECUTE,
-                return_result=ReturnResultType.ALL
+                return_edits=ReturnEditsMode.ALL
             ),
-            roles=[role_id]
+            member_id=str(member.id),
+            name=member.name,
+            linked_server_id=str(member.guild.id),
+            nickname=member.nick,
+            roles=[str(role.id) for role in member.roles]
         )
 
         if response.validation.result != "VALID":
-            log.error("Failed to run delete role action")
+            ActionTypes.log.error("Failed to run create member action")
             return False
 
         return True
 
-    def delete_roles(role_ids: list[str]) -> bool:
-        for role_id in role_ids:
-            if not delete_role(role_id):
-                return False
+    @staticmethod
+    def delete_member(member: discord.Member) -> bool:
+        return ActionTypes.delete_members([member])
+
+    @staticmethod
+    def delete_members(members: list[discord.Member]) -> bool:
+        response: SyncApplyActionResponse = osdk.ontology.actions.delete_members(
+            action_config=ActionConfig(
+                mode=ActionMode.VALIDATE_AND_EXECUTE,
+                return_edits=ReturnEditsMode.ALL
+            ),
+            members=[str(member.id) for member in members]
+        )
+
+        if response.validation.result != "VALID":
+            ActionTypes.log.error("Failed to run delete members action")
+            return False
+
+        return True
+
+    @staticmethod
+    def create_role(role: discord.Role) -> bool:
+        response: SyncApplyActionResponse = osdk.ontology.actions.create_role(
+            action_config=ActionConfig(
+                mode=ActionMode.VALIDATE_AND_EXECUTE,
+                return_edits=ReturnEditsMode.ALL
+            ),
+            role_id=str(role.id),
+            name=role.name
+        )
+
+        if response.validation.result != "VALID":
+            ActionTypes.log.error("Failed to run create role action")
+            return False
+
+        return True
+
+    @staticmethod
+    def delete_role(role: discord.Role) -> bool:
+        return ActionTypes.delete_roles([role])
+
+    @staticmethod
+    def delete_roles(roles: list[discord.Role]) -> bool:
+        response: SyncApplyActionResponse = osdk.ontology.actions.delete_roles(
+            action_config=ActionConfig(
+                mode=ActionMode.VALIDATE_AND_EXECUTE,
+                return_edits=ReturnEditsMode.ALL
+            ),
+            roles=[str(role.id) for role in roles]
+        )
+
+        if response.validation.result != "VALID":
+            ActionTypes.log.error("Failed to run delete roles action")
+            return False
+
         return True

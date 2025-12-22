@@ -2,7 +2,8 @@ __pycache__
 .env
 .venv
 test.py
-*.sh
+docker_*.sh
+run_ci_build.sh
 log
 log-archive
 general-walarus-key.json

@@ -197,11 +197,11 @@ class WSECog(Cog, name="Walarus Stock Exchange"):
         for item in portfolios:
             last_transaction = item[0]
             portfolio = item[1]
-            message += (f"{last_transaction["user_name"]}\n"
-                        f"\tStock Value: ${round(portfolio["stock_value"], 2):,.2f}\n"
-                        f"\tCash Value: ${round(portfolio["cash_value"], 2):,.2f}\n"
-                        f"\tTotal Portfolio Value: ${round(portfolio["total"], 2):,.2f}\n"
-                        f"\tOverall Net: ${round(portfolio["net"], 2):,.2f}\n")
+            message += (f"{last_transaction['user_name']}\n"
+                        f"\tStock Value: ${round(portfolio['stock_value'], 2):,.2f}\n"
+                        f"\tCash Value: ${round(portfolio['cash_value'], 2):,.2f}\n"
+                        f"\tTotal Portfolio Value: ${round(portfolio['total'], 2):,.2f}\n"
+                        f"\tOverall Net: ${round(portfolio['net'], 2):,.2f}\n")
         message += "```"
 
         await ctx.send(message)

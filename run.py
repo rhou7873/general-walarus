@@ -1,9 +1,8 @@
-import os
 from bw_secrets import BOT_TOKEN
 import discord
 from discord.ext import commands
 from cogs import (ArchiveCog, ElectionCog, EventsCog,
-                  MiscellaneousCog, StatisticsCog, VoiceCog, OpenAICog,
+                  MiscellaneousCog, StatisticsCog, VoiceCog,
                   WSECog)
 from ai import LLMEngine, VisionEngine
 from utilities import get_server_prefix

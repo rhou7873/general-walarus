@@ -1,15 +1,7 @@
-from bw_secrets import FOUNDRY_CLIENT_ID, FOUNDRY_CLIENT_SECRET, FOUNDRY_URL
-from general_walarus_python_osdk_sdk import ConfidentialClientAuth, FoundryClient
+from bw_secrets import FOUNDRY_URL, OSDK_RUN_TOKEN
+from general_walarus_python_osdk_sdk import UserTokenAuth, FoundryClient
+import logging
 
-auth = ConfidentialClientAuth(
-    client_id=FOUNDRY_CLIENT_ID,
-    client_secret=FOUNDRY_CLIENT_SECRET,
-    hostname=FOUNDRY_URL,
-    should_refresh=True,
-    scopes=[
-		"api:use-ontologies-read",
-		"api:use-ontologies-write"
-    ],
-)
-
+log = logging.getLogger(__name__)
+auth = UserTokenAuth(token=OSDK_RUN_TOKEN)
 osdk = FoundryClient(auth=auth, hostname=FOUNDRY_URL)

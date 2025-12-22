@@ -1,4 +1,3 @@
-from argparse import Action
 from datetime import datetime, timedelta
 import discord
 from discord.ext.commands import Cog
@@ -12,6 +11,7 @@ from models import Server, WSESession
 from globals import servers, live_wse_sessions
 from utilities import printlog, send_message
 from osdk import ActionTypes
+import logging
 
 
 class EventsCog(Cog, name="Events"):
@@ -82,7 +82,7 @@ class EventsCog(Cog, name="Events"):
         db.log_server(guild)
 
         # OSDK update
-        ActionTypes.create_guild(guild.id)
+        ActionTypes.create_guild(guild)
 
 
     @commands.Cog.listener()
@@ -96,7 +96,7 @@ class EventsCog(Cog, name="Events"):
             f"{db.remove_discord_server(guild)} documents removed from database")
 
         # OSDK update
-        ActionTypes.delete_guild(guild.id)
+        ActionTypes.delete_guild(guild)
 
     @commands.Cog.listener()
     async def on_guild_update(self, before: discord.Guild, after: discord.Guild):
@@ -126,7 +126,7 @@ class EventsCog(Cog, name="Events"):
                     await general.send("@everyone the WSE has crashed!!")
 
         # OSDK update
-        ActionTypes.create_member(member.id)
+        ActionTypes.create_member(member)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
@@ -138,7 +138,7 @@ class EventsCog(Cog, name="Events"):
             return
 
         # OSDK update
-        ActionTypes.delete_member(member.id)
+        ActionTypes.delete_member(member)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, ex: commands.CommandError):
