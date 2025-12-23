@@ -10,7 +10,7 @@ from typing import cast
 from models import Server, WSESession
 from globals import servers, live_wse_sessions
 from utilities import printlog, send_message
-from osdk import ActionTypes
+from osdk import OsdkActions
 import logging
 
 
@@ -30,7 +30,12 @@ class EventsCog(Cog, name="Events"):
         """ Event that runs once General Walarus is up and running """
         EventsCog.initialize_servers(self.bot)
         EventsCog.initialize_wse_sessions(self.bot)
-        print(f"General Walarus active in {len(servers)} server(s)")
+
+        EventsCog.log.info("Syncing ontology...")
+        OsdkActions.sync_ontology(self.bot.guilds)
+
+        EventsCog.log.info(f"General Walarus active in {len(servers)} server(s)")
+
         # type: ignore
         await self.bot.get_cog("Archive").repeat_archive(timedelta(weeks=2))
 
@@ -82,8 +87,7 @@ class EventsCog(Cog, name="Events"):
         db.log_server(guild)
 
         # OSDK update
-        ActionTypes.create_guild(guild)
-
+        OsdkActions.sync_ontology(self.bot.guilds)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
@@ -96,7 +100,7 @@ class EventsCog(Cog, name="Events"):
             f"{db.remove_discord_server(guild)} documents removed from database")
 
         # OSDK update
-        ActionTypes.delete_guild(guild)
+        OsdkActions.delete_guild(guild)
 
     @commands.Cog.listener()
     async def on_guild_update(self, before: discord.Guild, after: discord.Guild):
@@ -126,7 +130,7 @@ class EventsCog(Cog, name="Events"):
                     await general.send("@everyone the WSE has crashed!!")
 
         # OSDK update
-        ActionTypes.create_member(member)
+        OsdkActions.upsert_member(member)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
@@ -138,7 +142,7 @@ class EventsCog(Cog, name="Events"):
             return
 
         # OSDK update
-        ActionTypes.delete_member(member)
+        OsdkActions.delete_member(member)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, ex: commands.CommandError):
@@ -147,7 +151,12 @@ class EventsCog(Cog, name="Events"):
             await ctx.send("That ain't a command my brother in Christ")
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+    async def on_voice_state_update(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState
+    ):
         """ Event that runs when a user changes voice state (join/leaves VC, gets muted/unmuted, 
             gets deafened/undeafened, etc.) """
         guild: discord.Guild = member.guild
@@ -164,7 +173,13 @@ class EventsCog(Cog, name="Events"):
 
     # region Helper Functions
 
-    def db_update_voice(self, member: discord.Member, guild: discord.Guild, before: discord.VoiceState, after: discord.VoiceState) -> None:
+    def db_update_voice(
+        self,
+        member: discord.Member,
+        guild: discord.Guild,
+        before: discord.VoiceState,
+        after: discord.VoiceState
+    ) -> None:
         """ Analyzes before and after voice state and updates user voice status in database """
         now: datetime = datetime.now()
         if before.channel == None and after.channel != None:

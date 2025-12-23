@@ -6,6 +6,7 @@ from cogs import (ArchiveCog, ElectionCog, EventsCog,
                   WSECog)
 from ai import LLMEngine, VisionEngine
 from utilities import get_server_prefix
+import logging
 
 
 def run_bot(bot: commands.Bot):
@@ -14,6 +15,12 @@ def run_bot(bot: commands.Bot):
 
 def main():
     """ Setup bot intents and cogs and bring General Walarus to life """
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
     intents = discord.Intents.default()
     intents.message_content = True
     intents.members = True
