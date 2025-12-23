@@ -1,28 +1,19 @@
 steps:
-  # SSH into Compute Engine VM and deploy a new container
+  # Deploy container to Cloud Run
   - id: "deploy"
     name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: bash
     args:
-      - -c
-      - |
-        gcloud compute ssh rhou7873@general-walarus \
-          --zone=us-central1-a \
-          --ssh-flag="-o StrictHostKeyChecking=no" \
-          --command='
-            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet && \
-            docker pull us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest && \
-            docker stop $(docker ps -q) || true && \
-            docker system prune -f && \
-            docker run -d --name general-walarus-container-$BUILD_ID \
-              --volume /home/rhou/GeneralWalarus/creds:/creds \
-              --env BW_API_URL='"$_BW_API_URL"' \
-              --env BW_ID_URL='"$_BW_ID_URL"' \
-              --env BW_ACCESS_TOKEN='"$_BW_ACCESS_TOKEN"' \
-              --env ENVIRONMENT='"$_ENVIRONMENT"' \
-              -p 80:8000 \
-              us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest
-          '
+      - 'run'
+      - 'deploy'
+      - 'general-walarus'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8000'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--set-env-vars=BW_API_URL=$_BW_API_URL,BW_ID_URL=$_BW_ID_URL,BW_ACCESS_TOKEN=$_BW_ACCESS_TOKEN,ENVIRONMENT=$_ENVIRONMENT'
 
 options:
   logging: CLOUD_LOGGING_ONLY
