@@ -12,7 +12,8 @@ from globals import servers, live_wse_sessions
 from utilities import printlog, send_message
 from osdk import OsdkActions
 import logging
-
+import threading
+from api import run_api
 
 class EventsCog(Cog, name="Events"):
     """ Class containing implementations for Discord bot events """
@@ -35,6 +36,10 @@ class EventsCog(Cog, name="Events"):
         OsdkActions.sync_ontology(self.bot.guilds)
 
         EventsCog.log.info(f"General Walarus active in {len(servers)} server(s)")
+
+        # Start FastAPI server in a background thread
+        api_thread = threading.Thread(target=run_api, daemon=True)
+        api_thread.start()
 
         # type: ignore
         await self.bot.get_cog("Archive").repeat_archive(timedelta(weeks=2))
@@ -108,6 +113,9 @@ class EventsCog(Cog, name="Events"):
             Server information gets updated in the database """
         db.log_server(after)
         printlog(f"Server {before.id} was updated")
+        
+        # OSDK update
+        OsdkActions.upsert_guild(after)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
@@ -116,7 +124,6 @@ class EventsCog(Cog, name="Events"):
 
         if not db.create_user(guild, member):
             EventsCog.log.error("Failed to create user in MongoDB")
-            return
 
         # the following code is only if there is an active Walarus Stock Exchange
         if live_wse_sessions.get(guild) is not None:
@@ -139,7 +146,6 @@ class EventsCog(Cog, name="Events"):
 
         if not db.remove_user(guild, member):
             EventsCog.log.error("Failed to remove user in MongoDB")
-            return
 
         # OSDK update
         OsdkActions.delete_member(member)

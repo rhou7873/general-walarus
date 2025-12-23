@@ -16,4 +16,6 @@ RUN --mount=type=secret,id=osdk_generate_token \
     OSDK_EXTRA_INDEX_URL="$(cat /run/secrets/osdk_extra_index_url)" \
     ./osdk/generate_osdk.sh
 
+EXPOSE 8000
+
 CMD [ "python", "-u", "run.py" ]

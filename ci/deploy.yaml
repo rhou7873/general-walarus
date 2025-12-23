@@ -20,6 +20,7 @@ steps:
               --env BW_ID_URL='"$_BW_ID_URL"' \
               --env BW_ACCESS_TOKEN='"$_BW_ACCESS_TOKEN"' \
               --env ENVIRONMENT='"$_ENVIRONMENT"' \
+              -p 8000:8000 \
               us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest
           '
 
