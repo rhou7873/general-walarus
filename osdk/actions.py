@@ -144,8 +144,9 @@ class OsdkActions:
                 name=member.name,
                 is_bot=member.bot,
                 linked_server_id=str(member.guild.id),
-                nickname=member.nick,
-                roles=[str(role.id) for role in member.roles]
+                display_name=member.display_name,
+                roles_ids=[str(role.id) for role in member.roles],
+                roles_names=[role.name for role in member.roles]
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error(f"Failed to run upsert member action: member={member}")
