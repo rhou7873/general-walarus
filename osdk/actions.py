@@ -22,6 +22,7 @@ class OsdkActions:
 
         # Iterate over Pycord guilds
         guild_ids = set()
+        role_ids = set()
         member_ids = set()
         for guild in guilds:
             guild_ids.add(str(guild.id))
@@ -29,6 +30,12 @@ class OsdkActions:
             # Create missing OSDK guilds
             if str(guild.id) not in guilds_in_osdk or force_sync:
                 OsdkActions.upsert_guild(guild)
+
+            # Create missing OSDK roles & link to guild
+            for role in guild.roles:
+                if str(role.id) not in role_ids or force_sync:
+                    OsdkActions.upsert_role(role)
+                role_ids.add(str(role.id))
 
             # Create missing OSDK members & link to guild
             for member in guild.members:
@@ -42,11 +49,18 @@ class OsdkActions:
             if guild_id not in guild_ids]
         OsdkActions.delete_guilds(guilds_no_longer_connected)
 
+        # Remove role objects that no longer exist in guilds
+        roles_no_longer_existing = [role_id
+            for role_id in role_ids 
+            if role_id not in role_ids]
+        OsdkActions.delete_roles(roles_no_longer_existing)
+
         # Remove member objects for members that no longer exist in guilds
         members_no_longer_existing = [member_id
             for member_id in members_in_osdk 
             if member_id not in member_ids]
         OsdkActions.delete_members(members_no_longer_existing)
+
 
     @staticmethod
     def link_members_to_guild(members: list[discord.Member]) -> bool:
@@ -203,6 +217,7 @@ class OsdkActions:
                     return_edits=ReturnEditsMode.ALL
                 ),
                 role_id=str(role.id),
+                linked_server_id=str(role.guild.id),
                 name=role.name
             )
             if response.validation.result != "VALID":
