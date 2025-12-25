@@ -33,7 +33,7 @@ class EventsCog(Cog, name="Events"):
         EventsCog.initialize_wse_sessions(self.bot)
 
         EventsCog.log.info("Syncing ontology...")
-        OsdkActions.sync_ontology(self.bot.guilds)
+        OsdkActions.sync_ontology(self.bot.guilds, force_sync=True)
 
         EventsCog.log.info(f"General Walarus active in {len(servers)} server(s)")
 
@@ -149,6 +149,14 @@ class EventsCog(Cog, name="Events"):
 
         # OSDK update
         OsdkActions.delete_member(member)
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
+        """ Event that runs when a user's information gets updated """
+        EventsCog.log.info(f"Member '{after.name}' in '{after.guild.name}' was updated")
+
+        # OSDK update
+        OsdkActions.upsert_member(after)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, ex: commands.CommandError):
