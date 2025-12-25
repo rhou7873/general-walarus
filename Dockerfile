@@ -5,8 +5,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get -y install ffmpeg
 
-COPY . .
-
+COPY osdk ./osdk
 RUN chmod +x ./osdk/generate_osdk.sh
 RUN --mount=type=secret,id=osdk_generate_token \
     --mount=type=secret,id=osdk_index_url \
@@ -15,6 +14,9 @@ RUN --mount=type=secret,id=osdk_generate_token \
     OSDK_INDEX_URL="$(cat /run/secrets/osdk_index_url)" \
     OSDK_EXTRA_INDEX_URL="$(cat /run/secrets/osdk_extra_index_url)" \
     ./osdk/generate_osdk.sh
+
+COPY . .
+
 
 EXPOSE 8000
 
