@@ -189,7 +189,11 @@ class EventsCog(Cog, name="Events"):
                     voice_client.cleanup()
 
     @commands.Cog.listener()
-    async def on_guild_channel_update(self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel):
+    async def on_guild_channel_update(
+        self,
+        before: discord.abc.GuildChannel,
+        after: discord.abc.GuildChannel
+    ):
         """ Event that runs when a channel's information gets updated """
         EventsCog.log.info(f"Channel '{after.name}' in '{after.guild.name}' was updated")
 
@@ -198,6 +202,26 @@ class EventsCog(Cog, name="Events"):
             OsdkActions.upsert_text_channel(after)
         elif isinstance(before, discord.CategoryChannel) and isinstance(after, discord.CategoryChannel):
             OsdkActions.upsert_channel_category(after)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
+        EventsCog.log.info(f"Channel '{channel.name}' in '{channel.guild.name}' was created")
+
+        # OSDK update
+        if isinstance(channel, discord.TextChannel):
+            OsdkActions.upsert_text_channel(channel)
+        elif isinstance(channel, discord.CategoryChannel):
+            OsdkActions.upsert_channel_category(channel)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
+        EventsCog.log.info(f"Channel '{channel.name}' in '{channel.guild.name}' was deleted")
+
+        # OSDK update
+        if isinstance(channel, discord.TextChannel):
+            OsdkActions.delete_text_channel(channel)
+        elif isinstance(channel, discord.CategoryChannel):
+            OsdkActions.delete_channel_category(channel)
 
     # endregion
 
