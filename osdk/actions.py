@@ -17,13 +17,22 @@ class OsdkActions:
 
     @staticmethod
     def sync_ontology(guilds: list[discord.Guild], force_sync: bool = False):
+        OsdkActions.log.info("Syncing ontology...")
+    
         guilds_in_osdk = [guild.server_id for guild in OsdkObjects.get_guilds()]
+        roles_in_osdk = [role.role_id for role in OsdkObjects.get_roles()]
         members_in_osdk = [member.member_id for member in OsdkObjects.get_members()]
+        channel_categories_in_osdk = [channel_category.category_id
+            for channel_category in OsdkObjects.get_channel_categories()]
+        text_channels_in_osdk = [text_channel.channel_id
+            for text_channel in OsdkObjects.get_text_channels()]
 
         # Iterate over Pycord guilds
         guild_ids = set()
         role_ids = set()
         member_ids = set()
+        category_ids = set()
+        text_channel_ids = set()
         for guild in guilds:
             guild_ids.add(str(guild.id))
 
@@ -33,7 +42,7 @@ class OsdkActions:
 
             # Create missing OSDK roles & link to guild
             for role in guild.roles:
-                if str(role.id) not in role_ids or force_sync:
+                if str(role.id) not in roles_in_osdk or force_sync:
                     OsdkActions.upsert_role(role)
                 role_ids.add(str(role.id))
 
@@ -43,6 +52,18 @@ class OsdkActions:
                     OsdkActions.upsert_member(member)
                 member_ids.add(OsdkActions.get_member_ontology_id(member))
 
+            # Create missing OSDK channel categories & link to guild
+            for category in guild.categories:
+                if str(category.id) not in channel_categories_in_osdk or force_sync:
+                    OsdkActions.upsert_channel_category(category)
+                category_ids.add(str(category.id))
+
+            # Create missing OSDK text channels & link to guild and category
+            for text_channel in guild.text_channels:
+                if str(text_channel.id) not in text_channels_in_osdk or force_sync:
+                    OsdkActions.upsert_text_channel(text_channel)
+                text_channel_ids.add(str(text_channel.id))
+
         # Remove guild objects for guilds that bot is no longer connected to
         guilds_no_longer_connected = [guild_id
             for guild_id in guilds_in_osdk 
@@ -51,7 +72,7 @@ class OsdkActions:
 
         # Remove role objects that no longer exist in guilds
         roles_no_longer_existing = [role_id
-            for role_id in role_ids 
+            for role_id in roles_in_osdk 
             if role_id not in role_ids]
         OsdkActions.delete_roles(roles_no_longer_existing)
 
@@ -61,6 +82,19 @@ class OsdkActions:
             if member_id not in member_ids]
         OsdkActions.delete_members(members_no_longer_existing)
 
+        # Remove channel category objects for categories that no longer exist in guilds
+        categories_no_longer_existing = [category_id
+            for category_id in channel_categories_in_osdk 
+            if category_id not in category_ids]
+        OsdkActions.delete_channel_categories(categories_no_longer_existing)
+
+        # Remove text channel objects for channels that no longer exist in guilds
+        text_channels_no_longer_existing = [text_channel_id
+            for text_channel_id in text_channels_in_osdk 
+            if text_channel_id not in text_channel_ids]
+        OsdkActions.delete_text_channels(text_channels_no_longer_existing)
+
+        OsdkActions.log.info("Ontology sync complete!")
 
     @staticmethod
     def link_members_to_guild(members: list[discord.Member]) -> bool:
@@ -230,12 +264,16 @@ class OsdkActions:
         return True
 
     @staticmethod
-    def delete_role(role: discord.Role) -> bool:
+    def delete_role(role: discord.Role | str) -> bool:
         return OsdkActions.delete_roles([role])
 
     @staticmethod
-    def delete_roles(roles: list[discord.Role]) -> bool:
-        if len(roles) == 0:
+    def delete_roles(roles: list[discord.Role | str]) -> bool:
+        role_ids = ([str(role.id) for role in roles] 
+            if len(roles) > 0 and isinstance(roles[0], discord.Role)
+            else roles)
+
+        if len(role_ids) == 0:
             return True
 
         try:
@@ -244,7 +282,7 @@ class OsdkActions:
                     mode=ActionMode.VALIDATE_AND_EXECUTE,
                     return_edits=ReturnEditsMode.ALL
                 ),
-                roles=[str(role.id) for role in roles]
+                roles=role_ids
             )
 
             if response.validation.result != "VALID":
@@ -253,6 +291,125 @@ class OsdkActions:
         except Exception as e:
             OsdkActions.log.error("Error when running delete roles action: "
                 f"roles={roles}, error={e}")
+            return False
+
+        return True
+
+    ############ TEXT CHANNEL ############
+
+    @staticmethod
+    def upsert_text_channel(text_channel: discord.TextChannel) -> bool:
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.upsert_text_channel(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                channel_id=str(text_channel.id),
+                linked_server_id=str(text_channel.guild.id),
+                name=text_channel.name,
+                linked_category_id=str(text_channel.category_id),
+                position=text_channel.position
+            )
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run upsert text channel action: "
+                    f"text_channel={text_channel}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running upsert text channel action: "
+                f"text_channel={text_channel}, error={e}")
+            return False
+
+        return True
+
+    @staticmethod
+    def delete_text_channel(text_channel: discord.TextChannel | str) -> bool:
+        return OsdkActions.delete_text_channels([text_channel])
+
+    @staticmethod
+    def delete_text_channels(text_channels: list[discord.TextChannel | str]) -> bool:
+        text_channel_ids = ([str(text_channel.id) for text_channel in text_channels] 
+            if len(text_channels) > 0 and isinstance(text_channels[0], discord.TextChannel)
+            else text_channels)
+
+        if len(text_channel_ids) == 0:
+            return True
+
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.delete_text_channels(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                channels=text_channel_ids
+            )
+
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run delete text channels action: "
+                    f"text_channels={text_channels}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running delete text channels action: "
+                f"text_channels={text_channels}, error={e}")
+            return False
+
+        return True
+
+    ############ CHANNEL CATEGORY ############
+
+    @staticmethod
+    def upsert_channel_category(category: discord.CategoryChannel) -> bool:
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.upsert_channel_category(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                category_id=str(category.id),
+                linked_server_id=str(category.guild.id),
+                name=category.name,
+                position=category.position
+            )
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run upsert channel category action: "
+                    f"category={category}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running upsert channel category action: "
+                f"category={category}, error={e}")
+            return False
+
+        return True
+
+    @staticmethod
+    def delete_channel_category(category: discord.CategoryChannel | str) -> bool:
+        return OsdkActions.delete_channel_categories([category])
+
+    @staticmethod
+    def delete_channel_categories(categories: list[discord.CategoryChannel | str]) -> bool:
+        category_ids = ([str(category.id) for category in categories] 
+            if len(categories) > 0 and isinstance(categories[0], discord.CategoryChannel)
+            else categories)
+
+        if len(category_ids) == 0:
+            return True
+
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.delete_channel_categories(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                categories=category_ids
+            )
+
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run delete channel categories action: "
+                    f"categories={categories}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running delete channel categories action: "
+                f"categories={categories}, error={e}")
             return False
 
         return True
