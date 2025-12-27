@@ -32,8 +32,13 @@ class EventsCog(Cog, name="Events"):
         EventsCog.initialize_servers(self.bot)
         EventsCog.initialize_wse_sessions(self.bot)
 
-        EventsCog.log.info("Syncing ontology...")
-        OsdkActions.sync_ontology(self.bot.guilds, force_sync=True)
+        ontology_sync_thread = threading.Thread(
+            target=OsdkActions.sync_ontology,
+            args=[self.bot.guilds],
+            kwargs={"force_sync": True},
+            daemon=True
+        )
+        ontology_sync_thread.start()
 
         EventsCog.log.info(f"General Walarus active in {len(servers)} server(s)")
 
