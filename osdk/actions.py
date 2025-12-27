@@ -63,13 +63,7 @@ class OsdkActions:
                 if str(text_channel.id) not in text_channels_in_osdk or force_sync:
                     OsdkActions.upsert_text_channel(text_channel)
                 text_channel_ids.add(str(text_channel.id))
-
-        # Remove guild objects for guilds that bot is no longer connected to
-        guilds_no_longer_connected = [guild_id
-            for guild_id in guilds_in_osdk 
-            if guild_id not in guild_ids]
-        OsdkActions.delete_guilds(guilds_no_longer_connected)
-
+        
         # Remove role objects that no longer exist in guilds
         roles_no_longer_existing = [role_id
             for role_id in roles_in_osdk 
@@ -81,6 +75,12 @@ class OsdkActions:
             for member_id in members_in_osdk 
             if member_id not in member_ids]
         OsdkActions.delete_members(members_no_longer_existing)
+        
+        # Remove text channel objects for channels that no longer exist in guilds
+        text_channels_no_longer_existing = [text_channel_id
+            for text_channel_id in text_channels_in_osdk 
+            if text_channel_id not in text_channel_ids]
+        OsdkActions.delete_text_channels(text_channels_no_longer_existing)
 
         # Remove channel category objects for categories that no longer exist in guilds
         categories_no_longer_existing = [category_id
@@ -88,11 +88,12 @@ class OsdkActions:
             if category_id not in category_ids]
         OsdkActions.delete_channel_categories(categories_no_longer_existing)
 
-        # Remove text channel objects for channels that no longer exist in guilds
-        text_channels_no_longer_existing = [text_channel_id
-            for text_channel_id in text_channels_in_osdk 
-            if text_channel_id not in text_channel_ids]
-        OsdkActions.delete_text_channels(text_channels_no_longer_existing)
+        # Remove guild objects for guilds that bot is no longer connected to
+        guilds_no_longer_connected = [guild_id
+            for guild_id in guilds_in_osdk 
+            if guild_id not in guild_ids]
+        OsdkActions.delete_guilds(guilds_no_longer_connected)
+
 
         OsdkActions.log.info("Ontology sync complete!")
 
