@@ -188,6 +188,17 @@ class EventsCog(Cog, name="Events"):
                 if voice_client:
                     voice_client.cleanup()
 
+    @commands.Cog.listener()
+    async def on_guild_channel_update(self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel):
+        """ Event that runs when a channel's information gets updated """
+        EventsCog.log.info(f"Channel '{after.name}' in '{after.guild.name}' was updated")
+
+        # OSDK update
+        if isinstance(before, discord.TextChannel) and isinstance(after, discord.TextChannel):
+            OsdkActions.upsert_text_channel(after)
+        elif isinstance(before, discord.CategoryChannel) and isinstance(after, discord.CategoryChannel):
+            OsdkActions.upsert_channel_category(after)
+
     # endregion
 
     # region Helper Functions
