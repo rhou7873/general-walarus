@@ -35,7 +35,7 @@ class EventsCog(Cog, name="Events"):
         ontology_sync_thread = threading.Thread(
             target=OsdkActions.sync_ontology,
             args=[self.bot.guilds],
-            kwargs={"force_sync": True},
+            kwargs={"force_sync": False},
             daemon=True
         )
         ontology_sync_thread.start()
@@ -56,8 +56,6 @@ class EventsCog(Cog, name="Events"):
             return
         if self.bot.user is None:
             raise Exception("bot.user is None")
-        if message.author is None:
-            raise Exception("message.author is None")
 
         bot_sent = message.author.bot
 

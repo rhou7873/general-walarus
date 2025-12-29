@@ -6,11 +6,12 @@ import discord.utils
 import database as db
 from datetime import timedelta, datetime
 from pytz import timezone
-from utilities import printlog
-
+import logging
+from osdk import OsdkActions
 
 class ArchiveCog(Cog, name="Archive"):
     """ Class containing commands pertaining to archiving general chat """
+    log = logging.getLogger(f"{__name__}.ArchiveCog")
 
     def __init__(self, bot: discord.Bot) -> None:
         self.bot = bot
@@ -63,16 +64,19 @@ class ArchiveCog(Cog, name="Archive"):
             await chat_to_archive.edit(name=new_name)
             new_channel = await guild.create_text_channel(name, category=general_category)
             await new_channel.send("good morning @everyone")
+
+            # OSDK update
+            OsdkActions.upsert_archive_event(chat_to_archive)
         except discord.HTTPException as ex:
             if ex.code == 50035:  # too many channels in category, make new archive category
-                printlog((f"Channel category '{archive_cat_name}' reached limit of "
+                ArchiveCog.log.info((f"Channel category '{archive_cat_name}' reached limit of "
                           f"50 channels in '{guild.name}' (id: {guild.id})"))
                 await guild.create_category_channel(archive_cat_name, position=archive_category.position-1)
                 await self.archive_general(guild, try_time=try_time+1)
             else:
-                printlog(str(ex))
+                ArchiveCog.log.error(str(ex))
         except Exception as ex:
-            printlog(str(ex))
+            ArchiveCog.log.error(str(ex))
 
     async def repeat_archive(self, freq: timedelta) -> None:
         """ Handles repeatedly archiving general chat """
@@ -82,10 +86,10 @@ class ArchiveCog(Cog, name="Archive"):
                 now = datetime.now()
                 try:
                     await self.archive_general(guild=guild)
-                    printlog(
+                    ArchiveCog.log.info(
                         str(now) + f": general archived in '{guild.name}' (id: {guild.id})")
                 except Exception as ex:
-                    printlog(str(
+                    ArchiveCog.log.error(str(
                         now) + f": there was an error archiving general in '{guild.name}' (id: {guild.id}): {str(ex)}")
             db.update_next_archive_date(freq)
             await self.sleep_until_archive()
