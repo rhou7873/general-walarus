@@ -1,7 +1,7 @@
 from .osdk_globals import osdk
 from .objects import OsdkObjects
 import discord
-from datetime import date
+from datetime import date, datetime
 from foundry_sdk_runtime.types import (
     ActionConfig,
     ActionMode,
@@ -423,7 +423,7 @@ class OsdkActions:
     @staticmethod
     def upsert_archive_event(
         channel: discord.TextChannel,
-        date: date | None = None
+        date_: date | None = None
     ) -> bool:
         try:
             response: SyncApplyActionResponse = osdk.ontology.actions.upsert_archive_event(
@@ -434,7 +434,7 @@ class OsdkActions:
                 archived_channel_id=str(channel.id),
                 archived_channel_name=channel.name,
                 guild_name=channel.guild.name,
-                date_=date
+                date_=date_ if date_ is not None else datetime.now().date()
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error("Failed to run upsert archive event action: "
