@@ -162,12 +162,7 @@ class OsdkActions:
         if len(guild_ids) == 0:
             return True
 
-        # First delete members
-        OsdkActions.delete_members(
-            [member for member in OsdkObjects.get_members() if member.linked_server_id in guild_ids]
-        )
-
-        # Now delete guilds
+        # Delete guilds
         try:
             response: SyncApplyActionResponse = osdk.ontology.actions.delete_guilds(
                 action_config=ActionConfig(

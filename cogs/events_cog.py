@@ -110,7 +110,7 @@ class EventsCog(Cog, name="Events"):
             f"{db.remove_discord_server(guild)} documents removed from database")
 
         # OSDK update
-        OsdkActions.delete_guild(guild)
+        OsdkActions.sync_ontology(self.bot.guilds)
 
     @commands.Cog.listener()
     async def on_guild_update(self, before: discord.Guild, after: discord.Guild):
