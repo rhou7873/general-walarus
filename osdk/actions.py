@@ -34,6 +34,7 @@ class OsdkActions:
         category_ids = set()
         text_channel_ids = set()
         for guild in guilds:
+            OsdkActions.log.info(f"Syncing guild {guild.name} (id: {guild.id})")
             guild_ids.add(str(guild.id))
 
             # Create missing OSDK guilds
@@ -42,24 +43,30 @@ class OsdkActions:
 
             # Create missing OSDK roles & link to guild
             for role in guild.roles:
+                OsdkActions.log.info(f"Syncing role {role.name} (id: {role.id})")
                 if str(role.id) not in roles_in_osdk or force_sync:
                     OsdkActions.upsert_role(role)
                 role_ids.add(str(role.id))
 
             # Create missing OSDK members & link to guild
             for member in guild.members:
+                OsdkActions.log.info(f"Syncing member {member.name} (id: {member.id})")
                 if OsdkActions.get_member_ontology_id(member) not in members_in_osdk or force_sync:
                     OsdkActions.upsert_member(member)
                 member_ids.add(OsdkActions.get_member_ontology_id(member))
 
             # Create missing OSDK channel categories & link to guild
             for category in guild.categories:
+                OsdkActions.log.info(f"Syncing channel category {category.name} "
+                    f"(id: {category.id})")
                 if str(category.id) not in channel_categories_in_osdk or force_sync:
                     OsdkActions.upsert_channel_category(category)
                 category_ids.add(str(category.id))
 
             # Create missing OSDK text channels & link to guild and category
             for text_channel in guild.text_channels:
+                OsdkActions.log.info(f"Syncing text channel {text_channel.name} "
+                    f"(id: {text_channel.id})")
                 if str(text_channel.id) not in text_channels_in_osdk or force_sync:
                     OsdkActions.upsert_text_channel(text_channel)
                 text_channel_ids.add(str(text_channel.id))
