@@ -416,3 +416,28 @@ class OsdkActions:
             return False
 
         return True
+
+    ############ ARCHIVE EVENTS ############
+
+    @staticmethod
+    def upsert_archive_event(channel: discord.TextChannel) -> bool:
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.upsert_archive_event(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                archived_channel_id=str(channel.id),
+                archived_channel_name=channel.name,
+                guild_name=channel.guild.name
+            )
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run upsert archive event action: "
+                    f"channel={channel}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running upsert archive event action: "
+                f"channel={channel}, error={e}")
+            return False
+
+        return True 
