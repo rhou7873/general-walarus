@@ -3,8 +3,11 @@ __pycache__
 .env
 .venv
 test.py
-docker_*.sh
 run_ci_build.sh
 log
 log-archive
 general-walarus-key.json
+
+# Local Docker build/run scripts
+build
+run
