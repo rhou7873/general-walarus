@@ -140,7 +140,9 @@ class OsdkActions:
                 server_id=str(guild.id),
                 name=guild.name,
                 description=guild.description,
-                icon_url=guild.icon.url
+                icon_url=guild.icon.url,
+                setting_election_roles=None,
+                setting_election_members=None
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error(f"Failed to run upsert guild action: guild={guild}")
