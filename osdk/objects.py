@@ -11,6 +11,10 @@ class OsdkObjects:
     ############ GUILD ############
 
     @staticmethod
+    def get_guild(guild_id: str):
+        return osdk.ontology.objects.Guild.get(guild_id)
+
+    @staticmethod
     def get_guilds() -> list[Guild]:
         return [guild
             for guild

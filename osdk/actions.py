@@ -132,6 +132,14 @@ class OsdkActions:
     @staticmethod
     def upsert_guild(guild: discord.Guild) -> bool:
         try:
+            # Need to explicitly fetch these pass into upsert guild action
+            # to make sure we don't overrwrite existing values
+            # (this is a workaround we must do because of this: 
+            # https://www.palantir.com/docs/foundry/functions/edits-overview#optional-arrays-in-function-backed-actions)
+            osdk_guild = OsdkObjects.get_guild(str(guild.id))
+            election_members = osdk_guild.setting_election_members
+            election_roles = osdk_guild.setting_election_roles
+
             response: SyncApplyActionResponse = osdk.ontology.actions.upsert_guild(
                 action_config=ActionConfig(
                     mode=ActionMode.VALIDATE_AND_EXECUTE,
@@ -141,8 +149,8 @@ class OsdkActions:
                 name=guild.name,
                 description=guild.description,
                 icon_url=guild.icon.url,
-                setting_election_roles=None,
-                setting_election_members=None
+                setting_election_members=election_members,
+                setting_election_roles=election_roles
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error(f"Failed to run upsert guild action: guild={guild}")
