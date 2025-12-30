@@ -425,6 +425,7 @@ class OsdkActions:
     @staticmethod
     def upsert_archive_event(
         channel: discord.TextChannel,
+        category: discord.CategoryChannel,
         date_: date | None = None
     ) -> bool:
         try:
@@ -435,6 +436,8 @@ class OsdkActions:
                 ),
                 archived_channel_id=str(channel.id),
                 archived_channel_name=channel.name,
+                archive_category_id=str(category.id),
+                archive_category_name=category.name,
                 guild_name=channel.guild.name,
                 date_=date_ if date_ is not None else datetime.now().date()
             )
