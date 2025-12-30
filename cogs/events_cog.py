@@ -35,7 +35,7 @@ class EventsCog(Cog, name="Events"):
         ontology_sync_thread = threading.Thread(
             target=OsdkActions.sync_ontology,
             args=[self.bot.guilds],
-            kwargs={"force_sync": False},
+            kwargs={"force_sync": True},
             daemon=True
         )
         ontology_sync_thread.start()
