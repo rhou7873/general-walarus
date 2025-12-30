@@ -17,7 +17,6 @@ RUN --mount=type=secret,id=osdk_generate_token \
 
 COPY . .
 
-
 EXPOSE 8000
 
 CMD [ "python", "-u", "run.py" ]

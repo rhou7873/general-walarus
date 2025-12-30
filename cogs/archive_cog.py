@@ -66,7 +66,7 @@ class ArchiveCog(Cog, name="Archive"):
             await new_channel.send("good morning @everyone")
 
             # OSDK update
-            OsdkActions.upsert_archive_event(chat_to_archive)
+            OsdkActions.upsert_archive_event(chat_to_archive, archive_category)
         except discord.HTTPException as ex:
             if ex.code == 50035:  # too many channels in category, make new archive category
                 ArchiveCog.log.info((f"Channel category '{archive_cat_name}' reached limit of "
