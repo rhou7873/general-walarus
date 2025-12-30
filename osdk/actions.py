@@ -137,8 +137,8 @@ class OsdkActions:
             # (this is a workaround we must do because of this: 
             # https://www.palantir.com/docs/foundry/functions/edits-overview#optional-arrays-in-function-backed-actions)
             osdk_guild = OsdkObjects.get_guild(str(guild.id))
-            election_members = osdk_guild.setting_election_members
-            election_roles = osdk_guild.setting_election_roles
+            election_members = [] if osdk_guild is None else osdk_guild.setting_election_members
+            election_roles = [] if osdk_guild is None else osdk_guild.setting_election_roles
 
             response: SyncApplyActionResponse = osdk.ontology.actions.upsert_guild(
                 action_config=ActionConfig(
