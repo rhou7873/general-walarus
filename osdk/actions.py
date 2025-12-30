@@ -140,15 +140,21 @@ class OsdkActions:
             election_members = [] if osdk_guild is None else osdk_guild.setting_election_members
             election_roles = [] if osdk_guild is None else osdk_guild.setting_election_roles
 
+            # Safely extracting parameters
+            server_id = str(guild.id)
+            name = guild.name
+            description = guild.description
+            icon_url = None if guild.icon is None else guild.icon.url
+
             response: SyncApplyActionResponse = osdk.ontology.actions.upsert_guild(
                 action_config=ActionConfig(
                     mode=ActionMode.VALIDATE_AND_EXECUTE,
                     return_edits=ReturnEditsMode.ALL
                 ),
-                server_id=str(guild.id),
-                name=guild.name,
-                description=guild.description,
-                icon_url=guild.icon.url,
+                server_id=server_id,
+                name=name,
+                description=description,
+                icon_url=icon_url,
                 setting_election_members=election_members,
                 setting_election_roles=election_roles
             )
@@ -199,18 +205,27 @@ class OsdkActions:
     @staticmethod
     def upsert_member(member: discord.Member) -> bool:
         try:
+            # Safely extracting parameters
+            member_id = OsdkActions.get_member_ontology_id(member)
+            name = member.name
+            is_bot = member.bot
+            linked_server_id = str(member.guild.id)
+            display_name = member.display_name
+            roles_id = [str(role.id) for role in member.roles]
+            roles_names = [role.name for role in member.roles]
+
             response: SyncApplyActionResponse = osdk.ontology.actions.upsert_member(
                 action_config=ActionConfig(
                     mode=ActionMode.VALIDATE_AND_EXECUTE,
                     return_edits=ReturnEditsMode.ALL
                 ),
-                member_id=OsdkActions.get_member_ontology_id(member),
-                name=member.name,
-                is_bot=member.bot,
-                linked_server_id=str(member.guild.id),
-                display_name=member.display_name,
-                roles_ids=[str(role.id) for role in member.roles],
-                roles_names=[role.name for role in member.roles]
+                member_id=member_id,
+                name=name,
+                is_bot=is_bot,
+                linked_server_id=linked_server_id,
+                display_name=display_name,
+                roles_ids=roles_id,
+                roles_names=roles_names
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error(f"Failed to run upsert member action: member={member}")
