@@ -138,7 +138,9 @@ class OsdkActions:
                     return_edits=ReturnEditsMode.ALL
                 ),
                 server_id=str(guild.id),
-                name=guild.name
+                name=guild.name,
+                description=guild.description,
+                icon_url=guild.icon.url
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error(f"Failed to run upsert guild action: guild={guild}")
@@ -445,4 +447,6 @@ class OsdkActions:
                 f"channel={channel}, error={e}")
             return False
 
-        return True 
+        return True
+
+    
