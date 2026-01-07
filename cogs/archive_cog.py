@@ -58,8 +58,7 @@ class ArchiveCog(Cog, name="Archive"):
         new_name = db.get_archived_name(name)
         archive_category = await self.get_channel_category(guild, archive_cat_name, False)
         try:
-            chat_to_archive, general_category = self.get_channel_to_archive(
-                guild, name, False)
+            chat_to_archive, general_category = self.get_channel_to_archive(guild, name, False)
             await chat_to_archive.move(beginning=True, category=archive_category, sync_permissions=True)
             await chat_to_archive.edit(name=new_name)
             new_channel = await guild.create_text_channel(name, category=general_category)
@@ -67,6 +66,7 @@ class ArchiveCog(Cog, name="Archive"):
 
             # OSDK update
             OsdkActions.upsert_archive_event(chat_to_archive, archive_category)
+            OsdkActions.upsert_guild(guild, next_archive_date=db.get_next_archive_date().date())
         except discord.HTTPException as ex:
             if ex.code == 50035:  # too many channels in category, make new archive category
                 ArchiveCog.log.info((f"Channel category '{archive_cat_name}' reached limit of "
@@ -82,6 +82,7 @@ class ArchiveCog(Cog, name="Archive"):
         """ Handles repeatedly archiving general chat """
         await self.sleep_until_archive()
         while True:
+            db.update_next_archive_date(freq)
             for guild in self.bot.guilds:
                 now = datetime.now()
                 try:
@@ -91,7 +92,6 @@ class ArchiveCog(Cog, name="Archive"):
                 except Exception as ex:
                     ArchiveCog.log.error(str(
                         now) + f": there was an error archiving general in '{guild.name}' (id: {guild.id}): {str(ex)}")
-            db.update_next_archive_date(freq)
             await self.sleep_until_archive()
 
     async def sleep_until_archive(self) -> None:
