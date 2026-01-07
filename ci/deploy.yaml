@@ -2,18 +2,13 @@ steps:
   # Deploy container to Cloud Run
   - id: "deploy"
     name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: gcloud
     args:
-      - 'run'
-      - 'deploy'
-      - 'general-walarus'
-      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/general-walarus-registry/general-walarus:latest'
-      - '--region=us-central1'
-      - '--platform=managed'
-      - '--allow-unauthenticated'
-      - '--port=8000'
-      - '--cpu=1'
-      - '--memory=512Mi'
-      - '--set-env-vars=BW_API_URL=$_BW_API_URL,BW_ID_URL=$_BW_ID_URL,BW_ACCESS_TOKEN=$_BW_ACCESS_TOKEN,ENVIRONMENT=$_ENVIRONMENT'
+      - compute
+      - ssh
+      - general-walarus
+      - --zone=us-central1-a
+      - --command='deploy_latest_container.sh'
 
 options:
   logging: CLOUD_LOGGING_ONLY
