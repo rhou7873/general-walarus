@@ -130,15 +130,25 @@ class OsdkActions:
     ############ GUILD ############
 
     @staticmethod
-    def upsert_guild(guild: discord.Guild) -> bool:
+    def upsert_guild(
+        guild: discord.Guild,
+        archive_category: str = None,
+        archive_freq: int = None,
+        channel_to_archive: str = None,
+        election_members: list[str] = None,
+        election_roles: list[str] = None,
+        next_archive_date: date = None
+    ) -> bool:
         try:
             # Need to explicitly fetch these pass into upsert guild action
             # to make sure we don't overrwrite existing values
             # (this is a workaround we must do because of this: 
             # https://www.palantir.com/docs/foundry/functions/edits-overview#optional-arrays-in-function-backed-actions)
             osdk_guild = OsdkObjects.get_guild(str(guild.id))
-            election_members = [] if osdk_guild is None else osdk_guild.setting_election_members
-            election_roles = [] if osdk_guild is None else osdk_guild.setting_election_roles
+            if election_members is None:
+                election_members = [] if osdk_guild is None else osdk_guild.setting_election_members
+            if election_roles is None:
+                election_roles = [] if osdk_guild is None else osdk_guild.setting_election_roles
 
             # Safely extracting parameters
             server_id = str(guild.id)
@@ -155,8 +165,12 @@ class OsdkActions:
                 name=name,
                 description=description,
                 icon_url=icon_url,
+                setting_archive_category=archive_category,
+                setting_archive_frequency=archive_freq,
+                setting_channel_to_archive=channel_to_archive,
                 setting_election_members=election_members,
-                setting_election_roles=election_roles
+                setting_election_roles=election_roles,
+                setting_next_archive_date=next_archive_date
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error(f"Failed to run upsert guild action: guild={guild}")
