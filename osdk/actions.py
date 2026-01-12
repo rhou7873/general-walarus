@@ -14,7 +14,7 @@ import logging
 class OsdkActions:
     log = logging.getLogger(f"{__name__}.OsdkActions")
 
-    ############ ONTOLOGY ############
+    #region ONTOLOGY
 
     @staticmethod
     def sync_ontology(guilds: list[discord.Guild], force_sync: bool = False):
@@ -127,7 +127,9 @@ class OsdkActions:
 
         return True
 
-    ############ GUILD ############
+    #endregion
+
+    #region GUILD
 
     @staticmethod
     def upsert_guild(
@@ -218,7 +220,9 @@ class OsdkActions:
 
         return True
 
-    ############ MEMBER ############
+    #endregion
+
+    #region MEMBER
 
     @staticmethod
     def upsert_member(member: discord.Member) -> bool:
@@ -289,7 +293,9 @@ class OsdkActions:
     def get_member_ontology_id(member: discord.Member) -> str:
         return f"{member.guild.id}_{member.id}"
 
-    ############ ROLE ############
+    #endregion
+
+    #region ROLE
 
     @staticmethod
     def upsert_role(role: discord.Role) -> bool:
@@ -344,7 +350,9 @@ class OsdkActions:
 
         return True
 
-    ############ TEXT CHANNEL ############
+    #endregion
+
+    #region TEXT CHANNEL
 
     @staticmethod
     def upsert_text_channel(text_channel: discord.TextChannel) -> bool:
@@ -404,7 +412,9 @@ class OsdkActions:
 
         return True
 
-    ############ CHANNEL CATEGORY ############
+    #endregion
+
+    #region CHANNEL CATEGORY
 
     @staticmethod
     def upsert_channel_category(category: discord.CategoryChannel) -> bool:
@@ -463,7 +473,9 @@ class OsdkActions:
 
         return True
 
-    ############ ARCHIVE EVENTS ############
+    #endregion
+
+    #region ARCHIVE EVENTS
 
     @staticmethod
     def upsert_archive_event(
@@ -495,4 +507,84 @@ class OsdkActions:
 
         return True
 
-    
+    #endregion
+
+    #region ELECTIONS
+
+    @staticmethod
+    def start_election(
+        guild: discord.Guild
+    ) -> bool:
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.start_election(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                linked_server_id=str(guild.id),
+                guild_name=guild.name,
+                status="In Progress",
+                start_time=datetime.now()
+            )
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run start election action: "
+                    f"guild={guild}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running start election action: "
+                f"guild={guild}, error={e}")
+            return False
+
+        return True
+
+    @staticmethod
+    def stop_election(
+        guild: discord.Guild
+    ) -> bool:
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.stop_election(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                server=str(guild.id)
+            )
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run stop election action: "
+                    f"guild={guild}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running stop election action: "
+                f"guild={guild}, error={e}")
+            return False
+
+        return True
+
+    @staticmethod
+    def get_election_result(
+        guild: discord.Guild,
+        member: discord.Member,
+        role: discord.Role
+    ) -> bool:
+        try:
+            response: SyncApplyActionResponse = osdk.ontology.actions.get_election_result(
+                action_config=ActionConfig(
+                    mode=ActionMode.VALIDATE_AND_EXECUTE,
+                    return_edits=ReturnEditsMode.ALL
+                ),
+                server=str(guild.id),
+                member=str(member.id),
+                role=str(role.id)
+            )
+            if response.validation.result != "VALID":
+                OsdkActions.log.error("Failed to run get election result action: "
+                    f"guild={guild}, member={member}, role={role}")
+                return False
+        except Exception as e:
+            OsdkActions.log.error("Error when running get election result action: "
+                f"guild={guild}, member={member}, role={role}, error={e}")
+            return False
+
+        return True
+
+    #endregion

@@ -8,7 +8,7 @@ import logging
 class OsdkObjects:
     log = logging.getLogger(f"{__name__}.OsdkObjects")
 
-    ############ GUILD ############
+    #region GUILD
 
     @staticmethod
     def get_guild(guild_id: str):
@@ -21,7 +21,9 @@ class OsdkObjects:
             in osdk.ontology.objects.Guild.iterate()
         ]
     
-    ############ MEMBER ############
+    #endregion
+
+    #region MEMBER
 
     @staticmethod
     def get_members() -> list[Member]:
@@ -30,7 +32,9 @@ class OsdkObjects:
             in osdk.ontology.objects.Member.iterate()
         ]
 
-    ############ ROLE ############
+    #endregion
+
+    #region ROLE
 
     @staticmethod
     def get_roles() -> list[Role]:
@@ -39,7 +43,9 @@ class OsdkObjects:
             in osdk.ontology.objects.Role.iterate()
         ]
 
-    ############ CHANNEL CATEGORY ############
+    #endregion
+
+    #region CHANNEL CATEGORY
 
     @staticmethod
     def get_channel_categories() -> list[ChannelCategory]:
@@ -48,11 +54,6 @@ class OsdkObjects:
             in osdk.ontology.objects.ChannelCategory.iterate()
         ]
 
-    ############ TEXT CHANNEL ############
+    #endregion
 
-    @staticmethod
-    def get_text_channels() -> list[TextChannel]:
-        return [text_channel
-            for text_channel
-            in osdk.ontology.objects.TextChannel.iterate()
-        ]
+    #region TEXT CHANNEL
