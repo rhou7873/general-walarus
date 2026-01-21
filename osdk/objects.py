@@ -57,3 +57,12 @@ class OsdkObjects:
     #endregion
 
     #region TEXT CHANNEL
+
+    @staticmethod
+    def get_text_channels() -> list[TextChannel]:
+        return [text_channel
+            for text_channel
+            in osdk.ontology.objects.TextChannel.iterate()
+        ]
+
+    #endregion

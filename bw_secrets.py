@@ -33,6 +33,10 @@ client.access_token_login(ACCESS_TOKEN)
 
 ################# ENVIRONMENT VARIABLES #################
 
+# API
+API_TOKEN = client.secrets().get(
+    "900228c4-b7f9-4dd7-8468-b3d90038473c").data.value
+
 # Discord
 BOT_TOKEN = (
     client.secrets().get(  # BOT_TOKEN_PROD
