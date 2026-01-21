@@ -27,7 +27,7 @@ class ElectionCog(Cog, name="Election"):
             await ctx.send("There are no elections currently active")
 
     @commands.command(name="election", aliases=["startelection"])
-    async def start_elections(self, ctx: commands.Context, arg="default"):
+    async def start_election(self, ctx: commands.Context, arg="default"):
         """ Command that initiates an automated election """
         if ctx.guild is None:
             raise Exception("ctx.guild is None")
