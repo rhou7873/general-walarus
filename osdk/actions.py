@@ -524,7 +524,7 @@ class OsdkActions:
                 linked_server_id=str(guild.id),
                 guild_name=guild.name,
                 status="In Progress",
-                start_time=datetime.now()
+                start_timestamp=datetime.now()
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error("Failed to run start election action: "
@@ -573,8 +573,8 @@ class OsdkActions:
                     return_edits=ReturnEditsMode.ALL
                 ),
                 server=str(guild.id),
-                member=str(member.id),
-                role=str(role.id)
+                selected_member=OsdkActions.get_member_ontology_id(member),
+                selected_role=str(role.id)
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error("Failed to run get election result action: "

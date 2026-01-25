@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 import discord
 from discord.ext.commands import Cog
@@ -12,8 +13,8 @@ from globals import servers, live_wse_sessions
 from utilities import printlog, send_message
 from osdk import OsdkActions
 import logging
-import threading
 from api import run_api
+
 
 class EventsCog(Cog, name="Events"):
     """ Class containing implementations for Discord bot events """
@@ -32,19 +33,18 @@ class EventsCog(Cog, name="Events"):
         EventsCog.initialize_servers(self.bot)
         EventsCog.initialize_wse_sessions(self.bot)
 
-        ontology_sync_thread = threading.Thread(
-            target=OsdkActions.sync_ontology,
-            args=[self.bot.guilds],
-            kwargs={"force_sync": True},
-            daemon=True
-        )
-        ontology_sync_thread.start()
+        # Sync ontology in the background
+        loop = asyncio.get_running_loop()
+        loop.run_in_executor(None, lambda: OsdkActions.sync_ontology(
+            guilds=self.bot.guilds,
+            force_sync=False
+        ))
 
-        EventsCog.log.info(f"General Walarus active in {len(servers)} server(s)")
+        EventsCog.log.info(
+            f"General Walarus active in {len(servers)} server(s)")
 
-        # Start FastAPI server in a background thread
-        api_thread = threading.Thread(target=run_api, daemon=True)
-        api_thread.start()
+        # Start FastAPI server
+        asyncio.create_task(run_api(self.bot))
 
         # type: ignore
         await self.bot.get_cog("Archive").repeat_archive(timedelta(weeks=2))
@@ -116,7 +116,7 @@ class EventsCog(Cog, name="Events"):
             Server information gets updated in the database """
         db.log_server(after)
         printlog(f"Server {before.id} was updated")
-        
+
         # OSDK update
         OsdkActions.upsert_guild(after)
 
@@ -135,7 +135,7 @@ class EventsCog(Cog, name="Events"):
                 db.set_current_wse_price(member.guild, 0)
                 general: discord.TextChannel | None
                 general = utils.find(lambda channel: channel.name ==
-                                    "general", guild.text_channels)
+                                     "general", guild.text_channels)
                 if general is not None:
                     await general.send("@everyone the WSE has crashed!!")
 
@@ -156,7 +156,8 @@ class EventsCog(Cog, name="Events"):
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
         """ Event that runs when a user's information gets updated """
-        EventsCog.log.info(f"Member '{after.name}' in '{after.guild.name}' was updated")
+        EventsCog.log.info(
+            f"Member '{after.name}' in '{after.guild.name}' was updated")
 
         # OSDK update
         OsdkActions.upsert_member(after)
@@ -193,7 +194,8 @@ class EventsCog(Cog, name="Events"):
         after: discord.abc.GuildChannel
     ):
         """ Event that runs when a channel's information gets updated """
-        EventsCog.log.info(f"Channel '{after.name}' in '{after.guild.name}' was updated")
+        EventsCog.log.info(
+            f"Channel '{after.name}' in '{after.guild.name}' was updated")
 
         # OSDK update
         if isinstance(before, discord.TextChannel) and isinstance(after, discord.TextChannel):
@@ -203,7 +205,8 @@ class EventsCog(Cog, name="Events"):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
-        EventsCog.log.info(f"Channel '{channel.name}' in '{channel.guild.name}' was created")
+        EventsCog.log.info(
+            f"Channel '{channel.name}' in '{channel.guild.name}' was created")
 
         # OSDK update
         if isinstance(channel, discord.TextChannel):
@@ -213,7 +216,8 @@ class EventsCog(Cog, name="Events"):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
-        EventsCog.log.info(f"Channel '{channel.name}' in '{channel.guild.name}' was deleted")
+        EventsCog.log.info(
+            f"Channel '{channel.name}' in '{channel.guild.name}' was deleted")
 
         # OSDK update
         if isinstance(channel, discord.TextChannel):
