@@ -4,6 +4,7 @@ from discord.ext import commands
 import database as db
 from datetime import datetime
 from globals import servers
+import logging
 from models import Server, TimeSpan
 import os
 from pytz import timezone
@@ -13,6 +14,7 @@ from typing import cast
 
 class MiscellaneousCog(Cog, name="Miscellaneous"):
     """ Class containing General Walarus' miscellaneous commands """
+    log = logging.getLogger(f"{__name__}.MiscellaneousCog")
 
     # region Commands
 
@@ -65,6 +67,7 @@ class MiscellaneousCog(Cog, name="Miscellaneous"):
         for word in words:
             message += word + " "
         await ctx.send(message)
+        MiscellaneousCog.log.info(f"'{ctx.guild.name}' (id: {ctx.guild.id}) - echoed {message}")
 
     @commands.command(name="intodatabase", aliases=["intodb"])
     async def log_server_into_database(self, ctx: commands.Context):

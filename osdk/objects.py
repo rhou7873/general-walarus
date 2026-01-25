@@ -12,7 +12,17 @@ class OsdkObjects:
 
     @staticmethod
     def get_guild(guild_id: str):
-        return osdk.ontology.objects.Guild.get(guild_id)
+        if not isinstance(guild_id, str):
+            guild_id = str(guild_id)
+        OsdkObjects.log.info(f"Getting OSDK guild object w/ id {guild_id}")
+
+        try:
+            osdk_guild = osdk.ontology.objects.Guild.get(guild_id)
+        except Exception as e:
+            OsdkObjects.log.error(f"Got error from OSDK get operation: {e}")
+
+        OsdkObjects.log.info(f"OSDK get response: {osdk_guild}")
+        return osdk_guild
 
     @staticmethod
     def get_guilds() -> list[Guild]:
