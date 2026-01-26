@@ -40,49 +40,71 @@ class ElectionCog(Cog, name="Election"):
             await ctx.send("Only the Supreme Leader can use this command")
             return
 
-        guild: discord.Guild = ctx.guild
-        channel: discord.TextChannel = ctx.channel
+        guild: discord.Guild
+        channel: discord.TextChannel
+        try:
+            guild = ctx.guild
+            channel = ctx.channel
+        except Exception as e:
+            ElectionCog.log.error(e)
+            return
 
-        await ElectionCog.initiate_election(
-            server_id=str(guild.id),
-            channel_id=str(channel.id)
-        )
+        ElectionCog.log.info(
+            f"Election triggered from command: guild={guild}, channel={channel}")
+
+        # Check an election isn't already currently in progress
+        if OsdkObjects.election_in_progress(str(guild.id)):
+            await ctx.send("Election is already in progress!")
+            return
+
+        try:
+            # OSDK update
+            if not OsdkActions.start_election(guild):
+                raise ElectionCogException("Failed to run start_election action in OSDK. An "
+                                           "election may already be in progress")
+        except ElectionCogException as e:
+            ElectionCog.log.error(e.message)
+            await ctx.send("Issue trying to initiate election")
 
     # endregion
 
     # region Helper Functions
 
-    async def initiate_election(self, server_id: str, channel_id: str | None = None):
-        # Get Pycord guild & channel instances from IDs
-        guild: discord.Guild
-        channel: discord.TextChannel
+    async def initiate_election(
+        self,
+        server: str | discord.Guild,
+        channel: str | discord.TextChannel | None = None
+    ):
+        # Get Pycord guild & channel instances
         try:
-            guild = self.bot.get_guild(int(server_id))
+            server = (server
+                      if isinstance(server, discord.Guild)
+                      else self.bot.get_guild(int(server)))
 
-            ElectionCog.log.info(
-                f"Got guild from given server_id: guild={guild}")
+            ElectionCog.log.info(f"Got guild instance: guild={server}")
 
-            channel = (discord.utils.get(guild.text_channels, name="general")
-                       if channel_id is None
-                       else self.bot.get_channel(int(channel_id)))
+            if isinstance(channel, str):
+                channel = (discord.utils.get(server.text_channels, name="general")
+                           if channel is not None and isinstance(channel, discord.TextChannel)
+                           else self.bot.get_channel(int(channel)))
 
             if channel is None:
                 ElectionCog.log.error("No channel ID provided, and couldn't infer which channel "
                                       "to send election status to: "
-                                      f"server_id={server_id}, channel_id={channel_id}")
+                                      f"server={server}, channel={channel}")
 
             ElectionCog.log.info(f"Got channel instance: channel={channel}")
         except ValueError:
             raise ElectionCogException("Error parsing given server_id and/or channel_id string as "
-                                       f"an int: server_id={server_id}, channel_id={channel_id}")
+                                       f"an int: server={server}, channel={channel}")
 
-        osdk_guild = OsdkObjects.get_guild(guild.id)
+        osdk_guild = OsdkObjects.get_guild(server.id)
         ElectionCog.log.info(
-            f"Election initiated in '{guild}' (id: {guild.id})")
+            f"Election initiated in '{server}' (id: {server.id})")
 
         if osdk_guild is None:
             raise ElectionCogException("Issue fetching OSDK guild object")
-        elif osdk_guild.live_election_id is not None and osdk_guild.live_election_id != "NONE":
+        elif OsdkObjects.election_in_progress(str(server.id)):
             raise ElectionCogException(f"'{osdk_guild.name}' (id: {osdk_guild.server_id}) "
                                        "already has an election in progress")
 
@@ -90,12 +112,12 @@ class ElectionCog(Cog, name="Election"):
         role_ids_set = set(osdk_guild.setting_election_roles)
         members = [member
                    for member
-                   in guild.members
+                   in server.members
                    if OsdkActions.get_member_ontology_id(member) in member_ids_set
                    ]
         roles = [role
                  for role
-                 in guild.roles
+                 in server.roles
                  if str(role.id)
                  in role_ids_set
                  ]
@@ -109,9 +131,9 @@ class ElectionCog(Cog, name="Election"):
             roles_str += f"- {role.name}\n"
 
         ElectionCog.log.info(
-            f"'{guild}' (id: {guild.id}) election: members - {members}")
+            f"'{server}' (id: {server.id}) election: members - {members}")
         ElectionCog.log.info(
-            f"'{guild}' (id: {guild.id}) election: roles - {roles}")
+            f"'{server}' (id: {server.id}) election: roles - {roles}")
 
         cadence_minutes = osdk_guild.setting_election_cadence
 
@@ -120,11 +142,11 @@ class ElectionCog(Cog, name="Election"):
                 "Was unable to fetch server's election cadence")
 
         ElectionCog.log.info(
-            f"'{guild}' (id: {guild.id}) election: cadence - {cadence_minutes}")
+            f"'{server}' (id: {server.id}) election: cadence - {cadence_minutes}")
 
         # Initiate election loop in the background
         asyncio.create_task(ElectionCog.election_loop(
-            guild=guild,
+            guild=server,
             channel=channel,
             members=members,
             roles=roles,
@@ -132,15 +154,7 @@ class ElectionCog(Cog, name="Election"):
         ))
 
         ElectionCog.log.info(
-            f"'{guild.name}' (id: {guild.id}) election: started election loop")
-
-        # OSDK update
-        if not OsdkActions.start_election(guild):
-            raise ElectionCogException("Failed to run start_election action in OSDK. An election "
-                                       "may already be in progress")
-
-        ElectionCog.log.info(
-            f"'{guild.name}' (id: {guild.id}) election: OSDK updated")
+            f"'{server.name}' (id: {server.id}) election: started election loop")
 
         await channel.send("@everyone **Election has started!**\n"
                            "```"
@@ -150,7 +164,7 @@ class ElectionCog(Cog, name="Election"):
                            f"{roles_str}"
                            "```")
 
-        return guild, channel
+        return server, channel
 
     async def election_loop(
         guild: discord.Guild,
