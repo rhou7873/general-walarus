@@ -72,8 +72,8 @@ async def start_election(
 
     try:
         guild, channel = await election_cog.initiate_election(
-            server_id=server_id,
-            channel_id=channel_id
+            server=server_id,
+            channel=channel_id
         )
     except ElectionCogException as e:
         raise HTTPException(

@@ -31,6 +31,11 @@ class OsdkObjects:
             in osdk.ontology.objects.Guild.iterate()
         ]
     
+    @staticmethod
+    def election_in_progress(guild_id: str) -> bool:
+        osdk_guild = OsdkObjects.get_guild(guild_id)
+        return not (osdk_guild.live_election_id is None or osdk_guild.live_election_id == "NONE")
+    
     #endregion
 
     #region MEMBER

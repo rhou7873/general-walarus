@@ -37,7 +37,7 @@ class EventsCog(Cog, name="Events"):
         loop = asyncio.get_running_loop()
         loop.run_in_executor(None, lambda: OsdkActions.sync_ontology(
             guilds=self.bot.guilds,
-            force_sync=False
+            force_sync=True
         ))
 
         EventsCog.log.info(
