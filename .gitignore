@@ -6,7 +6,7 @@ test.py
 run_ci_build.sh
 log
 log-archive
-general-walarus-key.json
+creds
 
 # Local Docker build/run scripts
 build
