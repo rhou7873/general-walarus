@@ -83,9 +83,9 @@ class ElectionCog(Cog, name="Election"):
 
             ElectionCog.log.info(f"Got guild instance: guild={server}")
 
-            if isinstance(channel, str):
+            if channel is None or isinstance(channel, str):
                 channel = (discord.utils.get(server.text_channels, name="general")
-                           if channel is not None and isinstance(channel, discord.TextChannel)
+                           if channel is None
                            else self.bot.get_channel(int(channel)))
 
             if channel is None:
