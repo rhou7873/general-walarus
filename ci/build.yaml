@@ -34,7 +34,8 @@ steps:
       - --config
       - ci/deploy.yaml
       - --no-source
-      - --service-account=ssh-vm@general-walarus.iam.gserviceaccount.com
+      - --service-account
+      - projects/general-walarus/serviceAccounts/ssh-vm@general-walarus.iam.gserviceaccount.com
       
 options:
   logging: CLOUD_LOGGING_ONLY
