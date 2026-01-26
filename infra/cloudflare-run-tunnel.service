@@ -1,0 +1,15 @@
+[Unit]
+Description=Run CloudFlare tunnel container
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/deploy_cloudflare_tunnel.sh
+
+# Retry once if Cloudflare or metadata is briefly unavailable
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
