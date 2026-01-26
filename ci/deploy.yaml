@@ -6,8 +6,7 @@ steps:
     args:
       - compute
       - ssh
-      - general-walarus
-      - --account=ssh-vm@general-walarus.iam.gserviceaccount.com
+      - general-walarus-new
       - --zone=us-central1-a
       - --command='deploy_latest_container.sh'
 
