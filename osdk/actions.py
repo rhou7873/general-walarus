@@ -513,7 +513,8 @@ class OsdkActions:
 
     @staticmethod
     def start_election(
-        guild: discord.Guild
+        guild: discord.Guild,
+        channel: discord.TextChannel | None = None
     ) -> bool:
         try:
             response: SyncApplyActionResponse = osdk.ontology.actions.start_election(
@@ -521,10 +522,8 @@ class OsdkActions:
                     mode=ActionMode.VALIDATE_AND_EXECUTE,
                     return_edits=ReturnEditsMode.ALL
                 ),
-                linked_server_id=str(guild.id),
-                guild_name=guild.name,
-                status="In Progress",
-                start_timestamp=datetime.now()
+                server=str(guild.id),
+                channel=str(channel.id) if channel is not None else None
             )
             if response.validation.result != "VALID":
                 OsdkActions.log.error("Failed to run start election action: "

@@ -59,7 +59,7 @@ class ElectionCog(Cog, name="Election"):
 
         try:
             # OSDK update
-            if not OsdkActions.start_election(guild):
+            if not OsdkActions.start_election(guild, channel):
                 raise ElectionCogException("Failed to run start_election action in OSDK. An "
                                            "election may already be in progress")
         except ElectionCogException as e:
